@@ -36,3 +36,17 @@ The setup flow is implemented with `ucapi-framework`, matching the architecture 
 The first manual entry screen now uses the exact field structure of the
 working Fire TV reference integration. No TV connection is attempted until
 the user submits the IP-address form.
+
+
+## v0.5.8 runtime startup fix
+
+The Remote 3 log showed that the integration crashed before setup with:
+
+`FileNotFoundError: /app/_internal/driver.json`
+
+The driver now resolves the external manifest from the executable directory:
+
+`/app/driver.json`
+
+This matches the installed Remote 3 package layout and no longer depends on
+PyInstaller's internal module directory.
