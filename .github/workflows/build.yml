@@ -56,7 +56,7 @@ jobs:
           cd artifacts
           tar czf "../${ARTIFACT_NAME}.tar.gz" driver-logo.png driver.json bin
           cd ..
-          tar tzf "${ARTIFACT_NAME}.tar.gz" | head -30
+          tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
