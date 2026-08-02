@@ -67,7 +67,7 @@ jobs:
           PY
           test -x artifacts/bin/driver
           test ! -e artifacts/bin/_internal/driver.json
-          jq -e '.driver_id == "philips_titanos" and .version == "0.5.6"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.5.7"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash

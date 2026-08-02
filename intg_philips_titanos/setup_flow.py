@@ -31,23 +31,30 @@ class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
         self._temp_pair_state: dict[str, Any] | None = None
 
     def get_manual_entry_form(self) -> RequestUserInput:
+        """Return the manual setup form.
+
+        Kept intentionally identical in structure to the working Fire TV
+        community integration: English-only labels, plain text fields and no
+        pre-filled network values.
+        """
+        _LOG.info("Building Philips manual entry form")
         return RequestUserInput(
-            {"en": "Philips TV Setup", "de": "Philips-TV einrichten"},
+            {"en": "Philips TV Setup"},
             [
                 {
                     "id": "name",
-                    "label": {"en": "Device name", "de": "Gerätename"},
-                    "field": {"text": {"value": "Philips 77OLED759/12"}},
+                    "label": {"en": "Device Name"},
+                    "field": {"text": {"value": "Philips TV"}},
                 },
                 {
                     "id": "host",
-                    "label": {"en": "TV IP address", "de": "TV-IP-Adresse"},
-                    "field": {"text": {"value": "192.168.178.58"}},
+                    "label": {"en": "IP Address"},
+                    "field": {"text": {"value": ""}},
                 },
                 {
                     "id": "mac",
-                    "label": {"en": "MAC address", "de": "MAC-Adresse"},
-                    "field": {"text": {"value": "38:1B:9E:DF:6F:CA"}},
+                    "label": {"en": "MAC Address (optional)"},
+                    "field": {"text": {"value": ""}},
                 },
             ],
         )

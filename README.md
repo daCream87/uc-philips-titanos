@@ -30,3 +30,9 @@ The setup flow is implemented with `ucapi-framework`, matching the architecture 
 - Removed the immediate authenticated probe after `pairGrant`; Titan OS may not accept the new digest credentials instantly.
 - Retry now clears stale pairing state so a new PIN can be requested.
 - Added `RESTART_TV`, trying `/6/system/reboot` and `/6/system/restart`. Availability depends on firmware.
+
+
+## v0.5.7 setup diagnostic
+The first manual entry screen now uses the exact field structure of the
+working Fire TV reference integration. No TV connection is attempted until
+the user submits the IP-address form.
