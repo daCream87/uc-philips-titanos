@@ -48,13 +48,26 @@ jobs:
           test -f artifacts/driver.json
           test -f artifacts/driver-logo.png
           python - <<'PY'
-          from PIL import Image
-          im = Image.open("artifacts/driver-logo.png")
-          assert im.size == (90, 90), im.size
+          import struct
+          from pathlib import Path
+
+          logo = Path("artifacts/driver-logo.png")
+          with logo.open("rb") as file:
+              signature = file.read(8)
+              if signature != b"\x89PNG\r\n\x1a\n":
+                  raise SystemExit("driver-logo.png is not a valid PNG")
+              length = struct.unpack(">I", file.read(4))[0]
+              chunk = file.read(4)
+              if chunk != b"IHDR" or length < 8:
+                  raise SystemExit("driver-logo.png has no valid IHDR chunk")
+              width, height = struct.unpack(">II", file.read(8))
+          if (width, height) != (90, 90):
+              raise SystemExit(f"driver-logo.png must be 90x90, got {width}x{height}")
+          print(f"Logo validated: {width}x{height}")
           PY
           test -x artifacts/bin/driver
           test ! -e artifacts/bin/_internal/driver.json
-          jq -e '.driver_id == "philips_titanos" and .version == "0.5.5"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.5.6"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash
