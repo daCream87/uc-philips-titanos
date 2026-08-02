@@ -69,7 +69,7 @@ jobs:
         shell: bash
         run: |
           tar czvf ${ARTIFACT_NAME}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
-          tar tzf ${ARTIFACT_NAME}.tar.gz | head -30
+          tar tzf ${ARTIFACT_NAME}.tar.gz | head -30 || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
