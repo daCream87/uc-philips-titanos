@@ -15,3 +15,8 @@ Enter TV IP, optional MAC address, and display name. Accept the pairing request 
 
 ## Notes
 Titan OS blocks `/applications` and `/sources` with HTTP 403 on the tested OLED759. Dedicated source/app key commands are used instead. The driver polls power, volume and mute every two seconds.
+
+
+## Paketformat v0.4.1
+
+Der Build erzeugt ein Remote-3-Archiv mit `driver.json` und `driver-logo.png` im Archivstamm sowie dem ausführbaren AArch64-Treiber unter `bin/driver`. Der Workflow validiert Metadaten, Dateirechte und Archivstruktur vor dem Upload als GitHub-Artefakt.

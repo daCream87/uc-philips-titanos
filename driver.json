@@ -1,12 +1,50 @@
 {
-  "driver_id": "philips_titanos_driver",
-  "version": "0.4.0",
-  "min_core_api": "0.20.0",
-  "name": {"en": "Philips Titan OS TV", "de": "Philips Titan OS TV"},
-  "icon": "custom:philips.png",
-  "description": {"en": "Direct local-network control for Philips Titan OS TVs.", "de": "Direkte Netzwerksteuerung für Philips Fernseher mit Titan OS."},
-  "developer": {"name": "Oliver / OpenAI", "url": "https://github.com/"},
-  "home_page": "https://github.com/",
-  "setup_data_schema": {"title": {"en": "Philips TV setup", "de": "Philips-TV einrichten"}, "settings": [{"id":"info","label":{"en":"Setup","de":"Einrichtung"},"field":{"label":{"value":{"en":"Pair the TV directly over the local network.","de":"Fernseher direkt über das lokale Netzwerk koppeln."}}}}]},
-  "release_date": "2026-08-02"
+  "driver_id": "uc_philips_titanos_driver",
+  "version": "0.4.1",
+  "min_core_api": "0.22.0",
+  "name": {
+    "en": "Philips Titan OS TV",
+    "de": "Philips Titan OS TV"
+  },
+  "icon": "custom:driver-logo.png",
+  "description": {
+    "en": "Direct local-network control for Philips Titan OS televisions using the Philips JointSpace API.",
+    "de": "Direkte lokale Netzwerksteuerung für Philips-Fernseher mit Titan OS über die Philips JointSpace API."
+  },
+  "developer": {
+    "name": "Oliver Berndt",
+    "email": "noreply@example.invalid",
+    "url": "https://github.com/daCream87"
+  },
+  "home_page": "https://github.com/daCream87/uc-philips-titanos",
+  "documentation": "https://github.com/daCream87/uc-philips-titanos/blob/main/README.md",
+  "release_date": "2026-08-02",
+  "setup_data_schema": {
+    "title": {
+      "en": "Philips TV Configuration",
+      "de": "Philips-TV-Konfiguration"
+    },
+    "description": {
+      "en": "Pair a Philips Titan OS television directly over the local network.",
+      "de": "Philips-Titan-OS-Fernseher direkt über das lokale Netzwerk koppeln."
+    },
+    "settings": [
+      {
+        "id": "info",
+        "label": {
+          "en": "Connect to Philips TV",
+          "de": "Mit Philips-TV verbinden"
+        },
+        "field": {
+          "label": {
+            "value": {
+              "en": "The television must be switched on and connected to the same network. Enter its IP address, MAC address and a display name. A PIN will then appear on the TV.",
+              "de": "Der Fernseher muss eingeschaltet und im selben Netzwerk sein. IP-Adresse, MAC-Adresse und Anzeigename eingeben. Anschließend erscheint eine PIN am Fernseher."
+            }
+          }
+        }
+      }
+    ]
+  },
+  "device_discovery": false
 }

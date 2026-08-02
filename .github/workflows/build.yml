@@ -1,33 +1,92 @@
 name: Build Remote 3 package
+
 on:
   workflow_dispatch:
   push:
-    tags: ["v*"]
+    tags:
+      - "v*"
+
 env:
   PYTHON_VER: 3.11.13-0.5.0
   INTG_NAME: philips-titanos
+
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - run: |
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '.driver_id and .version and .min_core_api and .name.en and .icon and .description.en and .developer.name and .developer.email and .setup_data_schema and (.device_discovery == false or .device_discovery == true)' driver.json >/dev/null
+          test -f driver-logo.png
+
+      - name: Enable aarch64 emulation
+        shell: bash
+        run: |
           sudo apt-get update
-          sudo apt-get install -y qemu-user-static binfmt-support
+          sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
       - name: Build aarch64 binary
+        shell: bash
         run: |
-          docker run --rm --platform=aarch64 --user=$(id -u):$(id -g) -v $GITHUB_WORKSPACE:/workspace \
-            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} bash -c \
-            "cd /workspace && python -m pip install -r requirements.txt && pyinstaller --collect-submodules haphilipsjs --collect-submodules zeroconf --clean --onedir --name driver src/driver.py"
-      - name: Package
+          set -euo pipefail
+          docker run --rm --name builder \
+            --platform=aarch64 \
+            --user=$(id -u):$(id -g) \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} \
+            bash -c "cd /workspace && \
+              python -m pip install --user -r requirements.txt && \
+              pyinstaller --clean --onedir --name intg-philips-titanos \
+                --collect-all haphilipsjs \
+                --collect-all zeroconf \
+                src/driver.py"
+
+      - name: Prepare package
+        shell: bash
         run: |
-          mkdir -p artifacts/bin
-          cp -r dist/driver/* artifacts/bin/
-          cp driver.json philips.png artifacts/
-          echo v$(jq -r .version driver.json) > artifacts/version.txt
-          tar czf uc-intg-${INTG_NAME}-v$(jq -r .version driver.json)-aarch64.tar.gz -C artifacts .
-      - uses: actions/upload-artifact@v4
+          set -euo pipefail
+          rm -rf artifacts
+          mkdir -p artifacts
+          mv dist/intg-philips-titanos artifacts/bin
+          mv artifacts/bin/intg-philips-titanos artifacts/bin/driver
+          chmod 755 artifacts/bin/driver
+          cp driver.json artifacts/driver.json
+          cp driver-logo.png artifacts/driver-logo.png
+          echo "v$(jq -r '.version' driver.json)" > artifacts/version.txt
+
+          test -x artifacts/bin/driver
+          test -f artifacts/bin/_internal/libpython3.11.so.1.0
+          test -f artifacts/driver.json
+          test -f artifacts/driver-logo.png
+
+          ARTIFACT_NAME="uc-intg-${INTG_NAME}-$(jq -r '.version' driver.json)-aarch64"
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> "$GITHUB_ENV"
+          tar czvf "${ARTIFACT_NAME}.tar.gz" -C artifacts .
+
+      - name: Verify archive layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf verify-package
+          mkdir verify-package
+          tar -xzf "${ARTIFACT_NAME}.tar.gz" -C verify-package
+          test -f verify-package/driver.json
+          test -f verify-package/driver-logo.png
+          test -x verify-package/bin/driver
+          jq -e '.driver_id == "uc_philips_titanos_driver" and .version == "0.4.1" and .icon == "custom:driver-logo.png" and .device_discovery == false' verify-package/driver.json >/dev/null
+          echo "Archive contents:"
+          find verify-package -maxdepth 2 -printf '%M %P\n' | sort
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
         with:
-          name: philips-titanos-aarch64
-          path: uc-intg-*.tar.gz
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}.tar.gz
+          if-no-files-found: error
+          retention-days: 7
