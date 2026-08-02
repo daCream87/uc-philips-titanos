@@ -38,12 +38,24 @@ class PhilipsDevice(PollingDevice):
         return self._config.host
 
     @property
+    def log_id(self) -> str:
+        return f"{self.name} ({self.address})"
+
+    @property
     def state(self) -> TvState:
         return self._state
 
     async def establish_connection(self):
+        # A powered-off TV is not a setup failure. Keep the entity available so
+        # Wake-on-LAN can still be used.
         await self.poll_device()
         return self._client
+
+    async def disconnect(self) -> None:
+        try:
+            await asyncio.to_thread(self._client.session.close)
+        finally:
+            await super().disconnect()
 
     async def poll_device(self) -> None:
         try:

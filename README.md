@@ -18,3 +18,9 @@ Direct local-network integration for Philips Titan OS TVs using JointSpace API 6
 
 ## Important
 The setup flow is implemented with `ucapi-framework`, matching the architecture used by working Remote 3 community integrations.
+
+## v0.5.2 pairing fix
+- Uses the exact successful Windows `pairRequest` / `pairGrant` sequence.
+- Verifies Digest credentials before configuration is saved.
+- Keeps the PIN session alive after an invalid PIN instead of falling into a Retry loop.
+- Removes unsupported physical channel-button enum mappings; channel controls remain on the UI page.

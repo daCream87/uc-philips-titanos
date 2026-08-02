@@ -48,8 +48,6 @@ class PhilipsRemote(RemoteEntity):
             (Buttons.VOLUME_UP, "VOLUME_UP"),
             (Buttons.VOLUME_DOWN, "VOLUME_DOWN"),
             (Buttons.MUTE, "MUTE"),
-            (Buttons.CHANNEL_UP, "CHANNEL_UP"),
-            (Buttons.CHANNEL_DOWN, "CHANNEL_DOWN"),
             (Buttons.RED, "NETFLIX"),
             (Buttons.GREEN, "PRIME_VIDEO"),
             (Buttons.YELLOW, "DISNEY_PLUS"),

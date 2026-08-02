@@ -48,15 +48,15 @@ jobs:
           test -f artifacts/driver.json
           test -f artifacts/driver-logo.png
           test -x artifacts/bin/driver
-          jq -e '.driver_id == "philips_titanos" and .version == "0.5.0"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.5.2"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash
         run: |
           cd artifacts
-          tar czf "../${ARTIFACT_NAME}.tar.gz" driver-logo.png driver.json bin
+          tar czf "../${ARTIFACT_NAME}.tar.gz" ./driver-logo.png ./driver.json ./bin/
           cd ..
-          tar tzf "${ARTIFACT_NAME}.tar.gz" | head -30
+          tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
