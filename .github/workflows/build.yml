@@ -1,0 +1,33 @@
+name: Build Remote 3 package
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+env:
+  PYTHON_VER: 3.11.13-0.5.0
+  INTG_NAME: philips-titanos
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static binfmt-support
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - name: Build aarch64 binary
+        run: |
+          docker run --rm --platform=aarch64 --user=$(id -u):$(id -g) -v $GITHUB_WORKSPACE:/workspace \
+            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} bash -c \
+            "cd /workspace && python -m pip install -r requirements.txt && pyinstaller --collect-submodules haphilipsjs --collect-submodules zeroconf --clean --onedir --name driver src/driver.py"
+      - name: Package
+        run: |
+          mkdir -p artifacts/bin
+          cp -r dist/driver/* artifacts/bin/
+          cp driver.json philips.png artifacts/
+          echo v$(jq -r .version driver.json) > artifacts/version.txt
+          tar czf uc-intg-${INTG_NAME}-v$(jq -r .version driver.json)-aarch64.tar.gz -C artifacts .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: philips-titanos-aarch64
+          path: uc-intg-*.tar.gz
