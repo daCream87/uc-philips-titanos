@@ -6,10 +6,10 @@ import ucapi
 from ucapi import media_player, remote
 from ucapi.remote import create_send_cmd
 from ucapi.ui import Buttons, Size, UiPage, create_btn_mapping, create_ui_icon, create_ui_text
-from client import PhilipsJointSpaceClient
-from commands import KEY_MAP, SUPPORTED_COMMANDS
-from config import ConfigStore, DeviceConfig
-from setup_flow import SetupFlow
+from .client import PhilipsJointSpaceClient
+from .commands import KEY_MAP, SUPPORTED_COMMANDS
+from .config import ConfigStore, DeviceConfig
+from .setup_flow import SetupFlow
 
 _LOG=logging.getLogger("philips_titan")
 LOOP=asyncio.new_event_loop(); asyncio.set_event_loop(LOOP)

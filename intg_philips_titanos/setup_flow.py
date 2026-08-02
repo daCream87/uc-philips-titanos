@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import Any
 from haphilipsjs import PhilipsTV
 from ucapi import AbortDriverSetup, DriverSetupRequest, RequestUserInput, SetupComplete, SetupError, UserDataResponse
-from config import ConfigStore, DeviceConfig
+from .config import ConfigStore, DeviceConfig
 
 class Step(IntEnum): START=0; PIN=1
 

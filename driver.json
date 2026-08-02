@@ -1,50 +1,32 @@
 {
-  "driver_id": "uc_philips_titanos_driver",
-  "version": "0.4.1",
+  "driver_id": "philips-titanos",
+  "version": "0.4.2",
   "min_core_api": "0.22.0",
-  "name": {
-    "en": "Philips Titan OS TV",
-    "de": "Philips Titan OS TV"
-  },
+  "name": {"en": "Philips Titan OS TV", "de": "Philips Titan OS TV"},
   "icon": "custom:driver-logo.png",
   "description": {
-    "en": "Direct local-network control for Philips Titan OS televisions using the Philips JointSpace API.",
-    "de": "Direkte lokale Netzwerksteuerung für Philips-Fernseher mit Titan OS über die Philips JointSpace API."
+    "en": "Direct local-network control for Philips Titan OS televisions using JointSpace API 6.",
+    "de": "Direkte lokale Netzwerksteuerung für Philips-Titan-OS-Fernseher über JointSpace API 6."
   },
   "developer": {
     "name": "Oliver Berndt",
-    "email": "noreply@example.invalid",
+    "email": "daCream87@users.noreply.github.com",
     "url": "https://github.com/daCream87"
   },
   "home_page": "https://github.com/daCream87/uc-philips-titanos",
   "documentation": "https://github.com/daCream87/uc-philips-titanos/blob/main/README.md",
   "release_date": "2026-08-02",
   "setup_data_schema": {
-    "title": {
-      "en": "Philips TV Configuration",
-      "de": "Philips-TV-Konfiguration"
-    },
-    "description": {
-      "en": "Pair a Philips Titan OS television directly over the local network.",
-      "de": "Philips-Titan-OS-Fernseher direkt über das lokale Netzwerk koppeln."
-    },
-    "settings": [
-      {
-        "id": "info",
-        "label": {
-          "en": "Connect to Philips TV",
-          "de": "Mit Philips-TV verbinden"
-        },
-        "field": {
-          "label": {
-            "value": {
-              "en": "The television must be switched on and connected to the same network. Enter its IP address, MAC address and a display name. A PIN will then appear on the TV.",
-              "de": "Der Fernseher muss eingeschaltet und im selben Netzwerk sein. IP-Adresse, MAC-Adresse und Anzeigename eingeben. Anschließend erscheint eine PIN am Fernseher."
-            }
-          }
-        }
-      }
-    ]
+    "title": {"en": "Philips TV Configuration", "de": "Philips-TV-Konfiguration"},
+    "description": {"en": "Philips TV configuration flow", "de": "Philips-TV-Einrichtung"},
+    "settings": [{
+      "id": "info",
+      "label": {"en": "Connect to Philips TV", "de": "Mit Philips-TV verbinden"},
+      "field": {"label": {"value": {
+        "en": "Enter the TV IP address, MAC address and display name. A PIN will be displayed on the TV.",
+        "de": "IP-Adresse, MAC-Adresse und Namen eingeben. Anschließend wird am Fernseher eine PIN angezeigt."
+      }}}
+    }]
   },
   "device_discovery": false
 }
