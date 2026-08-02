@@ -1,0 +1,12 @@
+{
+  "driver_id": "philips_titanos_driver",
+  "version": "0.4.0",
+  "min_core_api": "0.20.0",
+  "name": {"en": "Philips Titan OS TV", "de": "Philips Titan OS TV"},
+  "icon": "custom:philips.png",
+  "description": {"en": "Direct local-network control for Philips Titan OS TVs.", "de": "Direkte Netzwerksteuerung für Philips Fernseher mit Titan OS."},
+  "developer": {"name": "Oliver / OpenAI", "url": "https://github.com/"},
+  "home_page": "https://github.com/",
+  "setup_data_schema": {"title": {"en": "Philips TV setup", "de": "Philips-TV einrichten"}, "settings": [{"id":"info","label":{"en":"Setup","de":"Einrichtung"},"field":{"label":{"value":{"en":"Pair the TV directly over the local network.","de":"Fernseher direkt über das lokale Netzwerk koppeln."}}}}]},
+  "release_date": "2026-08-02"
+}
