@@ -1,6 +1,4 @@
-"""Remote 3 command names mapped to Philips JointSpace key names."""
-
-KEY_MAP: dict[str, str] = {
+KEY_MAP = {
     "POWER_OFF": "Standby",
     "BACK": "Back",
     "HOME": "Home",
@@ -47,7 +45,6 @@ KEY_MAP: dict[str, str] = {
     "DISNEY_PLUS": "Disney",
     "YOUTUBE": "YouTube",
     "CHANNELS_APP": "Channels",
-    "JOYN": "Joyn"
+    "JOYN": "Joyn",
 }
-
 SUPPORTED_COMMANDS = list(KEY_MAP)

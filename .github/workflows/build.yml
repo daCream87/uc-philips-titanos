@@ -7,69 +7,56 @@ on:
       - 'v*'
 
 env:
-  INTG_NAME: philips-titanos
   PYTHON_VER: 3.11.12-0.3.0
 
 jobs:
   build:
-    name: Build Release
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Get version and id
+      - name: Read manifest
         shell: bash
         run: |
-          VERSION=$(jq -r '.version' driver.json)
-          DRIVER_ID=$(jq -r '.driver_id' driver.json)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "DRIVER_ID=$DRIVER_ID" >> $GITHUB_ENV
+          echo "VERSION=$(jq -r '.version' driver.json)" >> "$GITHUB_ENV"
+          echo "DRIVER_ID=$(jq -r '.driver_id' driver.json)" >> "$GITHUB_ENV"
 
-      - name: Build
+      - name: Build AArch64 driver
         shell: bash
         run: |
-          sudo apt-get update && sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --rm --name builder \
-            --platform=aarch64 \
-            --user=$(id -u):$(id -g) \
-            -v ${GITHUB_WORKSPACE}:/workspace \
-            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} \
-            bash -c "cd /workspace && \
-              python -m pip install -r requirements.txt && \
-              pyinstaller --clean --onedir --name intg-${DRIVER_ID} \
-                --add-data driver.json:. \
-                --collect-all zeroconf \
-                --collect-all ucapi \
-                --collect-all haphilipsjs \
-                intg_philips_titanos/__main__.py"
+          docker run --rm             --platform=aarch64             --user=$(id -u):$(id -g)             -v "${GITHUB_WORKSPACE}:/workspace"             docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER}             bash -c "cd /workspace &&               python -m pip install -r requirements.txt &&               pyinstaller --clean --onedir --name intg-${DRIVER_ID}                 --add-data driver.json:.                 --collect-all ucapi                 --collect-all ucapi_framework                 --collect-all haphilipsjs                 --collect-all zeroconf                 intg_philips_titanos/__main__.py"
 
-      - name: Prepare artifacts
+      - name: Prepare package
         shell: bash
         run: |
+          rm -rf artifacts
           mkdir -p artifacts/bin
-          mv dist/intg-${DRIVER_ID}/* artifacts/bin
-          mv artifacts/bin/intg-${DRIVER_ID} artifacts/bin/driver
+          mv "dist/intg-${DRIVER_ID}/"* artifacts/bin/
+          mv "artifacts/bin/intg-${DRIVER_ID}" artifacts/bin/driver
           chmod 755 artifacts/bin/driver
           cp driver.json artifacts/
           cp assets/driver-logo.png artifacts/
-          ARTIFACT_NAME="uc-intg-${DRIVER_ID}-${VERSION}-aarch64"
-          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
 
-      - name: Validate package
+      - name: Validate
         shell: bash
         run: |
           test -f artifacts/driver.json
           test -f artifacts/driver-logo.png
           test -x artifacts/bin/driver
-          jq -e '.driver_id == "philips-titanos" and .version == "0.4.2"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.5.0"' artifacts/driver.json >/dev/null
 
-      - name: Create archive
+      - name: Create Remote 3 archive
         shell: bash
         run: |
-          tar czvf ${ARTIFACT_NAME}.tar.gz -C ${GITHUB_WORKSPACE}/artifacts .
-          tar tzf ${ARTIFACT_NAME}.tar.gz | head -30
+          cd artifacts
+          tar czf "../${ARTIFACT_NAME}.tar.gz" driver-logo.png driver.json bin
+          cd ..
+          tar tzf "${ARTIFACT_NAME}.tar.gz" | head -30
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
