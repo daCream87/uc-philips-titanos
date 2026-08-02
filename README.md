@@ -24,3 +24,9 @@ The setup flow is implemented with `ucapi-framework`, matching the architecture 
 - Verifies Digest credentials before configuration is saved.
 - Keeps the PIN session alive after an invalid PIN instead of falling into a Retry loop.
 - Removes unsupported physical channel-button enum mappings; channel controls remain on the UI page.
+
+
+## v0.5.5
+- Removed the immediate authenticated probe after `pairGrant`; Titan OS may not accept the new digest credentials instantly.
+- Retry now clears stale pairing state so a new PIN can be requested.
+- Added `RESTART_TV`, trying `/6/system/reboot` and `/6/system/restart`. Availability depends on firmware.

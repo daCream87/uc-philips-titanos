@@ -113,7 +113,7 @@ class PhilipsRemote(RemoteEntity):
                     self._item("Play/Pause", 1, 0, "PLAY_PAUSE", 2),
                     self._item(">>", 3, 0, "FAST_FORWARD"),
                     self._item("Stop", 1, 1, "STOP", 2),
-                    self._item("Options", 0, 2, "OPTIONS", 2),
+                    self._item("TV Restart", 0, 2, "RESTART_TV", 2),
                     self._item("Subtitle", 2, 2, "SUBTITLE", 2),
                     self._item("Red", 0, 4, "RED"),
                     self._item("Green", 1, 4, "GREEN"),

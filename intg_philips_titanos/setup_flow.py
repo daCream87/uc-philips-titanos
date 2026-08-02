@@ -183,23 +183,12 @@ class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
             username, password = str(result[0]), str(result[1])
             protocol = getattr(self._temp_tv, "protocol", "https")
 
-            # Verify the newly issued Digest credentials before returning the config.
-            verifier = PhilipsTV(
-                self._temp_host,
-                6,
-                secured_transport=(protocol == "https"),
-                username=username,
-                password=password,
-                verify=False,
-            )
-            try:
-                await _maybe_await(verifier.getPowerState())
-                await _maybe_await(verifier.getAudiodata())
-            finally:
-                close = getattr(verifier, "aclose", None)
-                if close:
-                    await _maybe_await(close())
-
+            # Important: do not probe the TV here. On Titan OS the credentials can
+            # need a few seconds before a new authenticated session is accepted.
+            # The previous implementation paired successfully, then failed during
+            # this immediate verification and the setup UI only showed a generic
+            # connection error. Returning the credentials directly matches the
+            # successful Windows pairing script.
             config = PhilipsConfig(
                 identifier=f"philips_{self._temp_host.replace('.', '_')}",
                 name=self._temp_name,
@@ -215,10 +204,14 @@ class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
             await self._reset_temp()
             return config
         except Exception as err:
-            # Keep host and pair state for another PIN attempt. Do not throw away
-            # the setup page and force the user into the broken Retry loop.
             _LOG.exception("Philips PIN verification failed")
-            raise ValueError(f"PIN verification failed: {err}") from err
+            # A failed grant invalidates or consumes the TV-side pairing session.
+            # Clear the temporary state so Retry starts a fresh pair/request instead
+            # of looping forever with a stale PIN session.
+            await self._reset_temp()
+            raise ValueError(
+                f"PIN verification failed: {err}. Restart setup to request a new PIN."
+            ) from err
 
     async def _reset_temp(self) -> None:
         await self._close_temp_tv()

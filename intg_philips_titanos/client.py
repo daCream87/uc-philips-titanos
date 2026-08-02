@@ -71,6 +71,23 @@ class PhilipsJointSpaceClient:
     def send_key(self, key: str) -> None:
         self.post("input/key", {"key": key})
 
+
+    def restart_tv(self) -> str:
+        """Try known JointSpace reboot endpoints.
+
+        Philips does not publish a universal network reboot endpoint for Titan OS.
+        Some firmware accepts one of these endpoints; otherwise we deliberately do
+        not pretend that a normal Standby key is a full reboot.
+        """
+        errors: list[str] = []
+        for endpoint in ("system/reboot", "system/restart"):
+            try:
+                self.post(endpoint, {})
+                return endpoint
+            except Exception as err:
+                errors.append(f"{endpoint}: {err}")
+        raise RuntimeError("TV firmware rejected network restart endpoints: " + " | ".join(errors))
+
     def set_volume(self, value: int, muted: bool = False) -> None:
         self.post("audio/volume", {"current": max(0, min(100, int(value))), "muted": bool(muted)})
 

@@ -75,7 +75,14 @@ class PhilipsDevice(PollingDevice):
         await asyncio.to_thread(self._client.send_key, "Standby")
         return True
 
+    async def restart_tv(self) -> bool:
+        endpoint = await asyncio.to_thread(self._client.restart_tv)
+        _LOG.info("[%s] TV restart requested via %s", self.log_id, endpoint)
+        return True
+
     async def send_command(self, command: str) -> bool:
+        if command == "RESTART_TV":
+            return await self.restart_tv()
         key = KEY_MAP.get(command)
         if not key:
             return False

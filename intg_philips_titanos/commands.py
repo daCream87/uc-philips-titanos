@@ -1,4 +1,5 @@
 KEY_MAP = {
+    # RESTART_TV is handled separately by the device, not as an input key.
     "POWER_OFF": "Standby",
     "BACK": "Back",
     "HOME": "Home",
@@ -47,4 +48,4 @@ KEY_MAP = {
     "CHANNELS_APP": "Channels",
     "JOYN": "Joyn",
 }
-SUPPORTED_COMMANDS = list(KEY_MAP)
+SUPPORTED_COMMANDS = list(KEY_MAP) + ["RESTART_TV"]
