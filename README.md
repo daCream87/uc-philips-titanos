@@ -61,3 +61,7 @@ PyInstaller's internal module directory.
 - Prevents unhandled network errors from surfacing as generic error 500.
 - Adds retries and explicit connectivity logging for every command.
 - Keeps the TV restart command (`system/reboot`, then `system/restart`).
+
+
+## v0.6.1
+Fully asynchronous runtime transport with detailed URL, retry and exception logging. Raw TCP pre-check removed; setup now uses the actual Philips API discovery call.

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import asyncio
+
 import inspect
 import ipaddress
 import logging
 import re
-import socket
 from typing import Any
 
 from haphilipsjs import PhilipsTV
@@ -29,12 +30,6 @@ def _local_ipv4_for(target: str) -> str | None:
         return None
 
 
-def _port_open(host: str, port: int, timeout: float = 2.0) -> bool:
-    try:
-        with socket.create_connection((host, port), timeout=timeout):
-            return True
-    except OSError:
-        return False
 
 
 class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
@@ -109,15 +104,6 @@ class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
                 f"{host} is the Remote 3 IP address. Enter the Philips TV IP address instead."
             )
 
-        if not _port_open(host, 1926):
-            if _port_open(host, 1925):
-                _LOG.warning("TV only answers on HTTP port 1925; trying compatibility mode")
-            else:
-                raise ValueError(
-                    f"Philips TV {host} is not reachable on port 1926 or 1925. "
-                    "Check the TV IP address and network."
-                )
-
         await self._reset_temp()
         self._temp_host = host
         self._temp_mac = mac
@@ -127,12 +113,22 @@ class PhilipsSetupFlow(BaseSetupFlow[PhilipsConfig]):
         self._temp_tv = tv
 
         try:
+            loop = asyncio.get_running_loop()
             _LOG.info(
-                "Pairing Philips TV host=%s remote_ip=%s api=6",
+                "Pairing Philips TV host=%s remote_ip=%s api=6 loop=%s",
+                host, local_ip, type(loop).__name__,
+            )
+            _LOG.info(
+                "Trying Philips discovery via haphilipsjs on ports 1925/1926 for %s",
                 host,
-                local_ip,
             )
             await _maybe_await(tv.getSystem())
+            _LOG.info(
+                "Philips /system discovered: api=%s secured_transport=%s pairing_type=%s",
+                getattr(tv, "api_version", 6),
+                getattr(tv, "secured_transport", None),
+                getattr(tv, "pairing_type", None),
+            )
             secured = getattr(tv, "secured_transport", True)
             await _maybe_await(tv.setTransport(secured_transport=bool(secured)))
 

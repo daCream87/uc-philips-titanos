@@ -74,7 +74,7 @@ jobs:
           assert "Path(sys.executable).resolve().parent / \"driver.json\"" in init_file
           print("Runtime manifest lookup validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.6.0"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.6.1"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash

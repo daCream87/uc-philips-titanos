@@ -1,17 +1,10 @@
-from __future__ import annotations
 
-import json
-import logging
-import socket
-import time
+from __future__ import annotations
+import asyncio, json, logging, socket
 from dataclasses import dataclass
 from typing import Any
-
-import requests
-from requests.auth import HTTPDigestAuth
-
+import httpx
 _LOG = logging.getLogger(__name__)
-
 
 @dataclass(slots=True)
 class TvState:
@@ -24,38 +17,17 @@ class TvState:
     channel_name: str | None = None
     app: str | None = None
 
-
 class PhilipsConnectionError(RuntimeError):
     pass
 
-
 class PhilipsJointSpaceClient:
-    """Direct Philips JointSpace API 6 client.
-
-    This keeps the same requests + HTTP Digest approach that was successfully
-    tested on Windows against the user's 77OLED759/12.
-    """
-
-    def __init__(
-        self,
-        host: str,
-        api_version: int = 6,
-        username: str = "",
-        password: str = "",
-        verify_tls: bool = False,
-        timeout: float = 4.0,
-        secured_transport: bool = True,
-    ) -> None:
-        self.host = host
-        self.api_version = api_version
-        self.timeout = timeout
-        self.verify_tls = verify_tls
+    def __init__(self, host: str, api_version: int = 6, username: str = "", password: str = "",
+                 verify_tls: bool = False, timeout: float = 5.0, secured_transport: bool = True) -> None:
+        self.host, self.api_version = host, api_version
+        self.username, self.password = username, password
+        self.verify_tls, self.timeout = verify_tls, timeout
         self.secured_transport = secured_transport
-        self.session = requests.Session()
-        if username:
-            self.session.auth = HTTPDigestAuth(username, password)
-        self.session.verify = verify_tls
-        requests.packages.urllib3.disable_warnings()  # type: ignore[attr-defined]
+        self._client: httpx.AsyncClient | None = None
         self._rebuild_base()
 
     def _rebuild_base(self) -> None:
@@ -63,135 +35,95 @@ class PhilipsJointSpaceClient:
         port = 1926 if self.secured_transport else 1925
         self.base = f"{protocol}://{self.host}:{port}/{self.api_version}"
 
-    @property
-    def port(self) -> int:
-        return 1926 if self.secured_transport else 1925
+    async def start(self) -> None:
+        if self._client is not None:
+            return
+        auth = httpx.DigestAuth(self.username, self.password) if self.username else None
+        self._client = httpx.AsyncClient(auth=auth, verify=self.verify_tls,
+            timeout=httpx.Timeout(self.timeout), follow_redirects=True, trust_env=False)
+        _LOG.info("Philips HTTP client created: base=%s secured=%s auth=%s",
+                  self.base, self.secured_transport, bool(auth))
 
-    def tcp_reachable(self, timeout: float = 2.0) -> bool:
-        try:
-            with socket.create_connection((self.host, self.port), timeout=timeout):
-                return True
-        except OSError:
-            return False
+    async def close(self) -> None:
+        if self._client:
+            await self._client.aclose()
+            self._client = None
 
-    def _request(
-        self,
-        method: str,
-        endpoint: str,
-        payload: dict[str, Any] | None = None,
-        retries: int = 2,
-    ) -> Any:
+    async def _request(self, method: str, endpoint: str, payload: dict[str, Any] | None = None,
+                       retries: int = 2) -> Any:
+        await self.start()
+        assert self._client is not None
         url = f"{self.base}/{endpoint.lstrip('/')}"
-        last_error: Exception | None = None
-
-        for attempt in range(retries + 1):
+        last_error = None
+        for attempt in range(1, retries + 2):
             try:
-                response = self.session.request(
-                    method,
-                    url,
-                    json=payload,
-                    timeout=self.timeout,
-                )
+                _LOG.debug("Philips request attempt=%s method=%s url=%s", attempt, method, url)
+                response = await self._client.request(method, url, json=payload)
+                _LOG.debug("Philips response status=%s url=%s", response.status_code, url)
                 response.raise_for_status()
                 if not response.content:
                     return None
-                content_type = response.headers.get("content-type", "")
-                if "json" in content_type:
-                    return response.json()
                 try:
                     return response.json()
-                except (ValueError, json.JSONDecodeError):
+                except Exception:
                     return response.text
-            except requests.RequestException as err:
+            except Exception as err:
                 last_error = err
-                if attempt < retries:
-                    time.sleep(0.35 * (attempt + 1))
-                    continue
-
+                _LOG.warning("Philips request failed attempt=%s/%s type=%s url=%s error=%s",
+                             attempt, retries + 1, type(err).__name__, url, err)
+                if attempt <= retries:
+                    await asyncio.sleep(0.4 * attempt)
         raise PhilipsConnectionError(
-            f"Philips TV {self.host}:{self.port} is not reachable for "
-            f"{method} /{self.api_version}/{endpoint.lstrip('/')}: {last_error}"
-        ) from last_error
+            f"{method} {url} failed after {retries + 1} attempts: "
+            f"{type(last_error).__name__}: {last_error}") from last_error
 
-    def get(self, endpoint: str) -> Any:
-        return self._request("GET", endpoint)
+    async def get(self, endpoint: str) -> Any:
+        return await self._request("GET", endpoint)
 
-    def post(self, endpoint: str, payload: dict[str, Any]) -> Any:
-        return self._request("POST", endpoint, payload)
+    async def post(self, endpoint: str, payload: dict[str, Any]) -> Any:
+        return await self._request("POST", endpoint, payload)
 
-    def send_key(self, key: str) -> None:
-        self.post("input/key", {"key": key})
+    async def send_key(self, key: str) -> None:
+        await self.post("input/key", {"key": key})
 
-    def restart_tv(self) -> str:
-        errors: list[str] = []
+    async def restart_tv(self) -> str:
+        errors = []
         for endpoint in ("system/reboot", "system/restart"):
             try:
-                self.post(endpoint, {})
+                await self.post(endpoint, {})
                 return endpoint
             except Exception as err:
                 errors.append(f"{endpoint}: {err}")
-        raise RuntimeError(
-            "TV firmware rejected network restart endpoints: " + " | ".join(errors)
-        )
+        raise RuntimeError("TV firmware rejected restart endpoints: " + " | ".join(errors))
 
-    def set_volume(self, value: int, muted: bool = False) -> None:
-        self.post(
-            "audio/volume",
-            {"current": max(0, min(60, int(value))), "muted": bool(muted)},
-        )
+    async def set_volume(self, value: int, muted: bool = False) -> None:
+        await self.post("audio/volume",
+                        {"current": max(0, min(60, int(value))), "muted": bool(muted)})
 
-    def wake_on_lan(self, mac: str) -> None:
+    async def wake_on_lan(self, mac: str) -> None:
         clean = mac.replace(":", "").replace("-", "")
         if len(clean) != 12:
             raise ValueError("Invalid MAC address")
         packet = bytes.fromhex("FF" * 6 + clean * 16)
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            sock.sendto(packet, ("255.255.255.255", 9))
+        def _send():
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                sock.sendto(packet, ("255.255.255.255", 9))
+        await asyncio.to_thread(_send)
 
-    def read_state(self) -> TvState:
+    async def read_state(self) -> TvState:
         state = TvState()
         try:
-            power = self.get("powerstate")
+            power = await self.get("powerstate")
             state.online = True
-            state.power = (
-                str(power.get("powerstate", "On")).upper()
-                if isinstance(power, dict)
-                else "ON"
-            )
+            state.power = str(power.get("powerstate", "On")).upper() if isinstance(power, dict) else "ON"
         except Exception:
             return state
-
-        for endpoint, handler in (
-            ("audio/volume", self._parse_audio),
-            ("activities/current", self._parse_activity),
-            ("activities/tv", self._parse_tv_activity),
-        ):
-            try:
-                handler(state, self.get(endpoint))
-            except Exception:
-                _LOG.debug("State endpoint unavailable: %s", endpoint, exc_info=True)
+        try:
+            audio = await self.get("audio/volume")
+            if isinstance(audio, dict):
+                state.volume = int(audio["current"]) if audio.get("current") is not None else None
+                state.muted = bool(audio.get("muted", False))
+        except Exception:
+            _LOG.debug("audio/volume unavailable", exc_info=True)
         return state
-
-    @staticmethod
-    def _parse_audio(state: TvState, data: Any) -> None:
-        if isinstance(data, dict):
-            current = data.get("current")
-            state.volume = int(current) if current is not None else None
-            state.muted = bool(data.get("muted", False))
-
-    @staticmethod
-    def _parse_activity(state: TvState, data: Any) -> None:
-        if isinstance(data, dict):
-            component = data.get("component")
-            if isinstance(component, dict):
-                state.app = component.get("packageName") or component.get("className")
-            state.source = data.get("source") or state.source
-
-    @staticmethod
-    def _parse_tv_activity(state: TvState, data: Any) -> None:
-        if isinstance(data, dict):
-            channel = data.get("channel")
-            if isinstance(channel, dict):
-                state.channel = str(channel.get("ccid") or channel.get("preset") or "") or None
-                state.channel_name = channel.get("name")
