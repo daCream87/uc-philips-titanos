@@ -1,7 +1,6 @@
 ucapi>=0.7.0,<0.8
 ucapi-framework>=1.9.5,<2
 requests>=2.31.0,<3
-ha-philipsjs==3.2.5
 zeroconf>=0.132.0
-
 httpx>=0.28.1,<1
+cryptography>=46,<51

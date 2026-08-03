@@ -69,3 +69,13 @@ Fully asynchronous runtime transport with detailed URL, retry and exception logg
 
 ## v0.6.2
 Fixed the setup crash `NameError: socket is not defined` by restoring the required standard-library import. Added a CI source check to prevent this regression.
+
+
+## v0.6.3 direct Philips pairing
+
+- Removed `haphilipsjs` from the setup path.
+- `/6/system`, `/6/pair/request` and `/6/pair/grant` are now called directly.
+- Uses the same Philips HMAC and Digest pairing protocol as the successful desktop test.
+- Tries HTTPS first and HTTP second for `/system`.
+- Logs the exact URL, HTTP status, protocol and concrete exception type.
+- Keeps UC add, update, remove, reset, backup and restore handling.
