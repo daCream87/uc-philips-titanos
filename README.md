@@ -50,3 +50,14 @@ The driver now resolves the external manifest from the executable directory:
 
 This matches the installed Remote 3 package layout and no longer depends on
 PyInstaller's internal module directory.
+
+
+## v0.6.0 hardened baseline
+
+- Keeps UC Framework add/update/remove/reset/backup/restore behavior.
+- Uses the exact Philips API 6 pairing call proven on Windows.
+- Rejects the Remote 3 IP when entered as the TV IP.
+- Tests Philips ports 1926/1925 before starting pairing.
+- Prevents unhandled network errors from surfacing as generic error 500.
+- Adds retries and explicit connectivity logging for every command.
+- Keeps the TV restart command (`system/reboot`, then `system/restart`).
