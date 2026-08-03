@@ -65,3 +65,7 @@ PyInstaller's internal module directory.
 
 ## v0.6.1
 Fully asynchronous runtime transport with detailed URL, retry and exception logging. Raw TCP pre-check removed; setup now uses the actual Philips API discovery call.
+
+
+## v0.6.2
+Fixed the setup crash `NameError: socket is not defined` by restoring the required standard-library import. Added a CI source check to prevent this regression.

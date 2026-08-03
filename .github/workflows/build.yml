@@ -74,7 +74,14 @@ jobs:
           assert "Path(sys.executable).resolve().parent / \"driver.json\"" in init_file
           print("Runtime manifest lookup validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.6.1"' artifacts/driver.json >/dev/null
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("intg_philips_titanos/setup_flow.py").read_text(encoding="utf-8")
+          assert "import socket" in source, "setup_flow.py uses socket but does not import it"
+          compile(source, "setup_flow.py", "exec")
+          print("Setup flow imports and syntax validated")
+          PY
+          jq -e '.driver_id == "philips_titanos" and .version == "0.6.2"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash

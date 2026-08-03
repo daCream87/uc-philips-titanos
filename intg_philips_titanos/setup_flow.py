@@ -6,6 +6,7 @@ import inspect
 import ipaddress
 import logging
 import re
+import socket
 from typing import Any
 
 from haphilipsjs import PhilipsTV
