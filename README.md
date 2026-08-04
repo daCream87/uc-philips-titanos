@@ -79,3 +79,15 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 - Tries HTTPS first and HTTP second for `/system`.
 - Logs the exact URL, HTTP status, protocol and concrete exception type.
 - Keeps UC add, update, remove, reset, backup and restore handling.
+
+
+## v0.7.0 UI and key mapping refresh
+
+- New grouped German touchscreen pages with symbolic labels.
+- Physical media buttons mapped where supported by the installed UC API.
+- Colour keys now map to Philips colour commands instead of app shortcuts.
+- Settings uses `Options` instead of ignored `Adjust`.
+- Added Record, Next and Previous commands.
+- Channels opens live TV (`WatchTV`).
+- Restart falls back to standby plus Wake-on-LAN when Titan OS rejects reboot endpoints with HTTP 400.
+- Streaming app keys remain experimental because availability depends on TV firmware.

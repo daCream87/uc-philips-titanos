@@ -57,7 +57,7 @@ class PhilipsDevice(PollingDevice):
 
     async def restart_tv(self):
         try:
-            endpoint = await self._client.restart_tv()
+            endpoint = await self._client.restart_tv(self._config.mac)
             _LOG.info("[%s] TV restart requested via %s", self.log_id, endpoint)
             return True
         except Exception:

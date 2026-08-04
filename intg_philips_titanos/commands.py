@@ -1,9 +1,9 @@
+# Philips JointSpace input keys. Some Titan OS builds only implement a subset.
 KEY_MAP = {
-    # RESTART_TV is handled separately by the device, not as an input key.
     "POWER_OFF": "Standby",
     "BACK": "Back",
     "HOME": "Home",
-    "SETTINGS": "Adjust",
+    "SETTINGS": "Options",       # Adjust was ignored on 77OLED759/12
     "OPTIONS": "Options",
     "INFO": "Info",
     "GUIDE": "Guide",
@@ -31,6 +31,9 @@ KEY_MAP = {
     "STOP": "Stop",
     "REWIND": "Rewind",
     "FAST_FORWARD": "FastForward",
+    "RECORD": "Record",
+    "NEXT": "Next",
+    "PREVIOUS": "Previous",
     "DIGIT_0": "Digit0",
     "DIGIT_1": "Digit1",
     "DIGIT_2": "Digit2",
@@ -41,11 +44,12 @@ KEY_MAP = {
     "DIGIT_7": "Digit7",
     "DIGIT_8": "Digit8",
     "DIGIT_9": "Digit9",
+    # Vendor app keys are firmware-dependent. Kept as experimental commands.
     "NETFLIX": "Netflix",
     "PRIME_VIDEO": "PrimeVideo",
     "DISNEY_PLUS": "Disney",
     "YOUTUBE": "YouTube",
-    "CHANNELS_APP": "Channels",
-    "JOYN": "Joyn",
+    "CHANNELS_APP": "WatchTV",
+    "JOYN": "Online",
 }
 SUPPORTED_COMMANDS = list(KEY_MAP) + ["RESTART_TV"]

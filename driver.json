@@ -1,6 +1,6 @@
 {
   "driver_id": "philips_titanos",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "min_core_api": "0.22.0",
   "name": {
     "en": "Philips Titan OS TV"
@@ -16,7 +16,7 @@
   },
   "home_page": "https://github.com/daCream87/uc-philips-titanos",
   "documentation": "https://github.com/daCream87/uc-philips-titanos/blob/main/README.md",
-  "release_date": "2026-08-02",
+  "release_date": "2026-08-04",
   "setup_data_schema": {
     "title": {
       "en": "Philips TV Configuration"

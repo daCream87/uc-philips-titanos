@@ -28,7 +28,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --rm             --platform=aarch64             --user=$(id -u):$(id -g)             -v "${GITHUB_WORKSPACE}:/workspace"             docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER}             bash -c "cd /workspace &&               python -m pip install -r requirements.txt &&               pyinstaller --clean --onedir --name intg-${DRIVER_ID}                 --collect-all ucapi                 --collect-all ucapi_framework                 --collect-all haphilipsjs                 --collect-all zeroconf                 intg_philips_titanos/__main__.py"
+          docker run --rm             --platform=aarch64             --user=$(id -u):$(id -g)             -v "${GITHUB_WORKSPACE}:/workspace"             docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER}             bash -c "cd /workspace &&               python -m pip install -r requirements.txt &&               pyinstaller --clean --onedir --name intg-${DRIVER_ID}                 --collect-all ucapi                 --collect-all ucapi_framework                 --collect-all zeroconf                 intg_philips_titanos/__main__.py"
 
       - name: Prepare package
         shell: bash
@@ -81,7 +81,7 @@ jobs:
           compile(source, "setup_flow.py", "exec")
           print("Setup flow imports and syntax validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.6.3"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.7.0"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash

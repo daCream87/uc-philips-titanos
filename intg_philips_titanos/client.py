@@ -86,7 +86,7 @@ class PhilipsJointSpaceClient:
     async def send_key(self, key: str) -> None:
         await self.post("input/key", {"key": key})
 
-    async def restart_tv(self) -> str:
+    async def restart_tv(self, mac: str = "") -> str:
         errors = []
         for endpoint in ("system/reboot", "system/restart"):
             try:
@@ -94,7 +94,16 @@ class PhilipsJointSpaceClient:
                 return endpoint
             except Exception as err:
                 errors.append(f"{endpoint}: {err}")
-        raise RuntimeError("TV firmware rejected restart endpoints: " + " | ".join(errors))
+
+        # Titan OS on 77OLED759/12 returns HTTP 400 for both restart endpoints.
+        # Fall back to a controlled standby + Wake-on-LAN cycle.
+        if mac:
+            await self.send_key("Standby")
+            await asyncio.sleep(8)
+            await self.wake_on_lan(mac)
+            return "standby+wake-on-lan"
+
+        raise RuntimeError("TV firmware rejected restart endpoints and no MAC is configured: " + " | ".join(errors))
 
     async def set_volume(self, value: int, muted: bool = False) -> None:
         await self.post("audio/volume",
