@@ -91,3 +91,19 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 - Channels opens live TV (`WatchTV`).
 - Restart falls back to standby plus Wake-on-LAN when Titan OS rejects reboot endpoints with HTTP 400.
 - Streaming app keys remain experimental because availability depends on TV firmware.
+
+
+## v0.8.0 – Clean icon layout
+
+- Replaced unreliable Unicode glyphs with packaged transparent PNG icons.
+- All navigation arrows, Back and Settings now use one consistent white style.
+- Removed Guide, Ambilight, Subtitle and TV Restart from the touchscreen pages.
+- Removed the dangerous restart implementation entirely.
+- Reworked the media page into a compact, uniform icon grid.
+- Corrected physical button mapping to the button identifiers available in ucapi 0.7.
+- Power now toggles based on the last known TV state.
+- Offline power-on uses repeated Wake-on-LAN packets and waits up to ten seconds for the TV API.
+- Bluetooth/IR fallback is not included because custom integrations currently have no supported
+  API for transmitting arbitrary Bluetooth or built-in IR commands. Wake-on-LAN is the safe
+  local-network fallback.
+- App buttons try multiple known Titan OS key names, but availability remains firmware-dependent.
