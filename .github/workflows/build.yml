@@ -39,7 +39,7 @@ jobs:
           mv "artifacts/bin/intg-${DRIVER_ID}" artifacts/bin/driver
           chmod 755 artifacts/bin/driver
           cp driver.json artifacts/
-          cp assets/*.png artifacts/
+          cp assets/driver-logo.png artifacts/
           echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
 
       - name: Validate
@@ -47,12 +47,6 @@ jobs:
         run: |
           test -f artifacts/driver.json
           test -f artifacts/driver-logo.png
-          test -f artifacts/ui-up.png
-          test -f artifacts/ui-down.png
-          test -f artifacts/ui-left.png
-          test -f artifacts/ui-right.png
-          test -f artifacts/ui-back.png
-          test -f artifacts/ui-settings.png
           python - <<'PY'
           import struct
           from pathlib import Path
@@ -87,13 +81,13 @@ jobs:
           compile(source, "setup_flow.py", "exec")
           print("Setup flow imports and syntax validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.8.0"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.8.1"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash
         run: |
           cd artifacts
-          tar czf "../${ARTIFACT_NAME}.tar.gz" ./*.png ./driver.json ./bin/
+          tar czf "../${ARTIFACT_NAME}.tar.gz" ./driver-logo.png ./driver.json ./bin/
           cd ..
           tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
 

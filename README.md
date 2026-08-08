@@ -107,3 +107,15 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
   API for transmitting arbitrary Bluetooth or built-in IR commands. Wake-on-LAN is the safe
   local-network fallback.
 - App buttons try multiple known Titan OS key names, but availability remains firmware-dependent.
+
+
+## v0.8.1 – Reliable text UI
+
+- Fixes the black Steuerung and Medien pages caused by unresolved custom icon resources.
+- Uses direct text widgets for all touch controls; no external UI resource lookup is required.
+- Restores four white directional arrows (↑ ↓ ← →) and keeps SOURCE prominently available.
+- Keeps the working Settings command.
+- Keeps the working numeric keypad unchanged.
+- Removes unverified Netflix, Prime Video, Disney+, YouTube and Joyn touch commands.
+- Keeps CHANNELS / WatchTV, which is confirmed working on the tested 77OLED759/12.
+- Restores the known-good v0.7.0 GitHub build workflow to avoid the v0.8.0 archive failure.

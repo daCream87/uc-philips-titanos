@@ -45,12 +45,7 @@ KEY_CANDIDATES = {
 
     # Experimental app buttons: different Titan OS firmware versions use
     # different key names. The driver tries the candidates in order.
-    "NETFLIX": ["Netflix", "NetflixApp"],
-    "PRIME_VIDEO": ["PrimeVideo", "Amazon", "AmazonPrime"],
-    "DISNEY_PLUS": ["Disney", "DisneyPlus"],
-    "YOUTUBE": ["YouTube", "Youtube"],
     "CHANNELS_APP": ["WatchTV", "Channels"],
-    "JOYN": ["Online", "Joyn"],
 }
 
 # Compatibility for existing imports.
