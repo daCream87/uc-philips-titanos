@@ -166,3 +166,15 @@ Restored the four colour buttons as red, green, yellow and blue dots on the main
 - Kept the working v0.8.4 control logic and layout unchanged.
 - This build is intended to distinguish integration metadata issues from
   stale Configurator/Core entity metadata.
+
+
+## v0.8.8 – Preserve existing entity / minimal Configurator metadata
+
+- Keeps the existing Remote entity id `remote.<device-id>` unchanged.
+- Existing Activities and button assignments can therefore continue to reference the same entity.
+- Removes prior `de_DE` / `en_US` runtime locale experiments.
+- Keeps Remote entity and UI page names as plain strings.
+- Leaves pairing, Philips communication, touchscreen layout, physical buttons,
+  numeric keypad, Channels and colour-key behavior unchanged.
+- This is a minimal compatibility build intended to avoid Configurator locale parsing
+  without forcing a new entity registration.
