@@ -1,17 +1,13 @@
 {
   "driver_id": "philips_titanos",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "min_core_api": "0.22.0",
   "name": {
-    "en": "Philips Titan OS TV",
-    "en_US": "Philips Titan OS TV",
-    "de_DE": "Philips Titan OS TV"
+    "en": "Philips Titan OS TV"
   },
   "icon": "custom:driver-logo.png",
   "description": {
-    "en": "Direct local-network control for Philips Titan OS televisions using JointSpace API 6.",
-    "en_US": "Direct local-network control for Philips Titan OS televisions using JointSpace API 6.",
-    "de_DE": "Direkte Philips Titan OS TV-Integration"
+    "en": "Direct local-network control for Philips Titan OS televisions using JointSpace API 6."
   },
   "developer": {
     "name": "Oliver Berndt",

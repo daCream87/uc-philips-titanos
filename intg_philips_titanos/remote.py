@@ -15,23 +15,13 @@ from intg_philips_titanos.device import PhilipsDevice
 _LOG = logging.getLogger(__name__)
 
 
-def _locale_name(value: str) -> dict[str, str]:
-    """Return a UC locale object for Configurator-facing names."""
-    return {
-        "en": value,
-        "en_US": value,
-        "de": value,
-        "de_DE": value,
-    }
-
-
 class PhilipsRemote(RemoteEntity):
     def __init__(self, device_config: PhilipsConfig, device: PhilipsDevice):
         self._device = device
         self._config = device_config
         super().__init__(
             f"remote.{device_config.identifier}",
-            _locale_name(device_config.name),
+            device_config.name,
             features=[Features.SEND_CMD, Features.ON_OFF, Features.TOGGLE],
             attributes={Attributes.STATE: States.UNKNOWN},
             simple_commands=SUPPORTED_COMMANDS,
@@ -130,7 +120,7 @@ class PhilipsRemote(RemoteEntity):
         return [
             {
                 "page_id": "control",
-                "name": {"en": "Control", "en_US": "Control", "de": "Steuerung", "de_DE": "Steuerung"},
+                "name": "Steuerung",
                 "grid": {"width": 4, "height": 7},
                 "items": [
                     self._text("POWER", 0, 0, "POWER_TOGGLE"),
@@ -164,7 +154,7 @@ class PhilipsRemote(RemoteEntity):
             },
             {
                 "page_id": "numbers",
-                "name": {"en": "Numbers", "en_US": "Numbers", "de": "Ziffern", "de_DE": "Ziffern"},
+                "name": "Ziffern",
                 "grid": {"width": 3, "height": 4},
                 "items": [
                     self._text(
@@ -179,7 +169,7 @@ class PhilipsRemote(RemoteEntity):
             },
             {
                 "page_id": "media",
-                "name": {"en": "Media", "en_US": "Media", "de": "Medien", "de_DE": "Medien"},
+                "name": "Medien",
                 "grid": {"width": 4, "height": 3},
                 "items": [
                     self._text("PREV", 0, 0, "PREVIOUS"),

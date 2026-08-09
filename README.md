@@ -155,3 +155,14 @@ Restored the four colour buttons as red, green, yellow and blue dots on the main
 - Added both `de`/`en` and `de_DE`/`en_US` variants where relevant.
 - Converted Remote entity display name and page titles from raw strings to locale objects.
 - No changes to pairing, Philips communication, key mappings or page layout.
+
+
+## v0.8.6 – Configurator compatibility rollback
+
+- Reverted v0.8.5 locale-object changes for Remote entity and page names.
+- UI page names are plain strings again.
+- Remote entity display name is a plain string again.
+- Removed `de_DE` / `en_US` variants from runtime source.
+- Kept the working v0.8.4 control logic and layout unchanged.
+- This build is intended to distinguish integration metadata issues from
+  stale Configurator/Core entity metadata.
