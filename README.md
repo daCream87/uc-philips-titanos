@@ -119,3 +119,16 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 - Removes unverified Netflix, Prime Video, Disney+, YouTube and Joyn touch commands.
 - Keeps CHANNELS / WatchTV, which is confirmed working on the tested 77OLED759/12.
 - Restores the known-good v0.7.0 GitHub build workflow to avoid the v0.8.0 archive failure.
+
+
+## v0.8.2 – UI cleanup & physical media buttons
+
+- SOURCE is now shown only once, on the main control page.
+- Removed the touchscreen PLAY/PAUSE control; separate PLAY and PAUSE remain.
+- Settings uses the monochrome text-style gear `⚙︎` instead of the blue emoji gear.
+- Colour keys are displayed as red, green, yellow and blue circles.
+- Physical PLAY now sends the proven Philips `Play` command instead of `PlayPause`.
+- Physical media mappings now use the standard Remote `send_cmd` structure from ucapi.
+- Physical STOP, PREV, NEXT and RECORD use the same standard `send_cmd` structure.
+- The numeric keypad remains unchanged.
+- Apps page keeps only CHANNELS, the app-style function confirmed working on this TV.

@@ -44,7 +44,20 @@ class PhilipsRemote(RemoteEntity):
     def _button(name: str):
         return getattr(Buttons, name, None)
 
+    @staticmethod
+    def _send_cmd(command: str) -> Dict[str, Any]:
+        # Use the Remote entity's standard SEND_CMD command instead of mapping
+        # physical keys directly to custom simple command ids. This mirrors the
+        # official ucapi helper create_send_cmd().
+        return {
+            "cmd_id": "send_cmd",
+            "params": {"command": command},
+        }
+
     def _button_mapping(self) -> List[Dict]:
+        # Remote 3 physical media keys are defined by ucapi as PLAY, STOP,
+        # PREV, NEXT and RECORD. PLAY is deliberately mapped to the proven
+        # Philips "Play" key instead of the non-working "PlayPause" key.
         candidates = [
             ("POWER", "POWER_TOGGLE"),
             ("HOME", "HOME"),
@@ -60,7 +73,7 @@ class PhilipsRemote(RemoteEntity):
             ("CHANNEL_UP", "CHANNEL_UP"),
             ("CHANNEL_DOWN", "CHANNEL_DOWN"),
             ("PREV", "PREVIOUS"),
-            ("PLAY", "PLAY_PAUSE"),
+            ("PLAY", "PLAY"),
             ("NEXT", "NEXT"),
             ("STOP", "STOP"),
             ("RECORD", "RECORD"),
@@ -70,6 +83,7 @@ class PhilipsRemote(RemoteEntity):
             ("YELLOW", "YELLOW"),
             ("BLUE", "BLUE"),
         ]
+
         result = []
         for name, command in candidates:
             button = self._button(name)
@@ -77,7 +91,7 @@ class PhilipsRemote(RemoteEntity):
                 result.append(
                     {
                         "button": button.value,
-                        "short_press": {"cmd_id": command},
+                        "short_press": self._send_cmd(command),
                         "long_press": None,
                     }
                 )
@@ -103,9 +117,6 @@ class PhilipsRemote(RemoteEntity):
         return item
 
     def _ui_pages(self) -> List[Dict[str, Any]]:
-        # Text widgets are used deliberately here. They render directly from the
-        # entity definition and don't depend on custom-icon resources being
-        # uploaded to the Remote 3 resource store.
         return [
             {
                 "page_id": "control",
@@ -115,7 +126,9 @@ class PhilipsRemote(RemoteEntity):
                     self._text("POWER", 0, 0, "POWER_TOGGLE"),
                     self._text("HOME", 1, 0, "HOME"),
                     self._text("SOURCE", 2, 0, "SOURCE"),
-                    self._text("⚙", 3, 0, "SETTINGS"),
+                    # U+FE0E requests monochrome/text presentation instead of
+                    # the blue emoji-style gear used by the previous build.
+                    self._text("⚙︎", 3, 0, "SETTINGS"),
 
                     self._text("↑", 1, 1, "CURSOR_UP"),
                     self._text("BACK", 3, 1, "BACK"),
@@ -135,39 +148,36 @@ class PhilipsRemote(RemoteEntity):
                     self._text("CH −", 0, 5, "CHANNEL_DOWN"),
                     self._text("CH +", 3, 5, "CHANNEL_UP"),
 
-                    self._text("ROT", 0, 6, "RED"),
-                    self._text("GRÜN", 1, 6, "GREEN"),
-                    self._text("GELB", 2, 6, "YELLOW"),
-                    self._text("BLAU", 3, 6, "BLUE"),
+                    # Emoji circles are rendered by the Remote itself, avoiding
+                    # the broken custom PNG resource path from v0.8.0.
+                    self._text("🔴", 0, 6, "RED"),
+                    self._text("🟢", 1, 6, "GREEN"),
+                    self._text("🟡", 2, 6, "YELLOW"),
+                    self._text("🔵", 3, 6, "BLUE"),
                 ],
             },
             {
                 "page_id": "media",
                 "name": "Medien",
-                "grid": {"width": 5, "height": 3},
+                "grid": {"width": 5, "height": 2},
                 "items": [
                     self._text("PREV", 0, 0, "PREVIOUS"),
                     self._text("REW", 1, 0, "REWIND"),
-                    self._text("PLAY/PAUSE", 2, 0, "PLAY_PAUSE"),
+                    self._text("PLAY", 2, 0, "PLAY"),
                     self._text("FF", 3, 0, "FAST_FORWARD"),
                     self._text("NEXT", 4, 0, "NEXT"),
 
-                    self._text("PLAY", 0, 1, "PLAY"),
                     self._text("PAUSE", 1, 1, "PAUSE"),
                     self._text("STOP", 2, 1, "STOP"),
                     self._text("REC", 3, 1, "RECORD"),
-                    self._text("SOURCE", 4, 1, "SOURCE"),
                 ],
             },
             {
                 "page_id": "apps",
                 "name": "Apps",
-                "grid": {"width": 4, "height": 2},
+                "grid": {"width": 4, "height": 1},
                 "items": [
-                    # Channels / WatchTV is the only app-style command confirmed
-                    # working on this Titan OS firmware.
-                    self._text("CHANNELS", 0, 0, "CHANNELS_APP", 2),
-                    self._text("SOURCE", 2, 0, "SOURCE", 2),
+                    self._text("CHANNELS", 1, 0, "CHANNELS_APP", 2),
                 ],
             },
             {
