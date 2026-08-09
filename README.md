@@ -143,3 +143,7 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 - SOURCE remains only once on the Steuerung page.
 - Settings is shown as plain white text for reliable rendering.
 - Numeric keypad remains unchanged.
+
+
+## v0.8.4
+Restored the four colour buttons as red, green, yellow and blue dots on the main control page.

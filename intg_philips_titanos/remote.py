@@ -146,10 +146,10 @@ class PhilipsRemote(RemoteEntity):
                     self._text("CH −", 0, 5, "CHANNEL_DOWN"),
                     self._text("CH +", 3, 5, "CHANNEL_UP"),
 
-                    self._text("ROT", 0, 6, "RED"),
-                    self._text("GRÜN", 1, 6, "GREEN"),
-                    self._text("GELB", 2, 6, "YELLOW"),
-                    self._text("BLAU", 3, 6, "BLUE"),
+                    self._text("🔴", 0, 6, "RED"),
+                    self._text("🟢", 1, 6, "GREEN"),
+                    self._text("🟡", 2, 6, "YELLOW"),
+                    self._text("🔵", 3, 6, "BLUE"),
                 ],
             },
             {
