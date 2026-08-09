@@ -147,3 +147,11 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 
 ## v0.8.4
 Restored the four colour buttons as red, green, yellow and blue dots on the main control page.
+
+
+## v0.8.5 – Configurator locale fix
+
+- Normalized Configurator-facing names to locale dictionaries.
+- Added both `de`/`en` and `de_DE`/`en_US` variants where relevant.
+- Converted Remote entity display name and page titles from raw strings to locale objects.
+- No changes to pairing, Philips communication, key mappings or page layout.
