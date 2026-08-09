@@ -126,9 +126,7 @@ class PhilipsRemote(RemoteEntity):
                     self._text("POWER", 0, 0, "POWER_TOGGLE"),
                     self._text("HOME", 1, 0, "HOME"),
                     self._text("SOURCE", 2, 0, "SOURCE"),
-                    # U+FE0E requests monochrome/text presentation instead of
-                    # the blue emoji-style gear used by the previous build.
-                    self._text("⚙︎", 3, 0, "SETTINGS"),
+                    self._text("SETTINGS", 3, 0, "SETTINGS"),
 
                     self._text("↑", 1, 1, "CURSOR_UP"),
                     self._text("BACK", 3, 1, "BACK"),
@@ -148,36 +146,10 @@ class PhilipsRemote(RemoteEntity):
                     self._text("CH −", 0, 5, "CHANNEL_DOWN"),
                     self._text("CH +", 3, 5, "CHANNEL_UP"),
 
-                    # Emoji circles are rendered by the Remote itself, avoiding
-                    # the broken custom PNG resource path from v0.8.0.
-                    self._text("🔴", 0, 6, "RED"),
-                    self._text("🟢", 1, 6, "GREEN"),
-                    self._text("🟡", 2, 6, "YELLOW"),
-                    self._text("🔵", 3, 6, "BLUE"),
-                ],
-            },
-            {
-                "page_id": "media",
-                "name": "Medien",
-                "grid": {"width": 5, "height": 2},
-                "items": [
-                    self._text("PREV", 0, 0, "PREVIOUS"),
-                    self._text("REW", 1, 0, "REWIND"),
-                    self._text("PLAY", 2, 0, "PLAY"),
-                    self._text("FF", 3, 0, "FAST_FORWARD"),
-                    self._text("NEXT", 4, 0, "NEXT"),
-
-                    self._text("PAUSE", 1, 1, "PAUSE"),
-                    self._text("STOP", 2, 1, "STOP"),
-                    self._text("REC", 3, 1, "RECORD"),
-                ],
-            },
-            {
-                "page_id": "apps",
-                "name": "Apps",
-                "grid": {"width": 4, "height": 1},
-                "items": [
-                    self._text("CHANNELS", 1, 0, "CHANNELS_APP", 2),
+                    self._text("ROT", 0, 6, "RED"),
+                    self._text("GRÜN", 1, 6, "GREEN"),
+                    self._text("GELB", 2, 6, "YELLOW"),
+                    self._text("BLAU", 3, 6, "BLUE"),
                 ],
             },
             {
@@ -195,7 +167,26 @@ class PhilipsRemote(RemoteEntity):
                 ]
                 + [self._text("0", 1, 3, "DIGIT_0")],
             },
+            {
+                "page_id": "media",
+                "name": "Medien",
+                "grid": {"width": 4, "height": 3},
+                "items": [
+                    self._text("PREV", 0, 0, "PREVIOUS"),
+                    self._text("REW", 1, 0, "REWIND"),
+                    self._text("PLAY", 2, 0, "PLAY"),
+                    self._text("FF", 3, 0, "FAST_FORWARD"),
+
+                    self._text("NEXT", 0, 1, "NEXT"),
+                    self._text("PAUSE", 1, 1, "PAUSE"),
+                    self._text("STOP", 2, 1, "STOP"),
+                    self._text("REC", 3, 1, "RECORD"),
+
+                    self._text("CHANNELS", 1, 2, "CHANNELS_APP", 2),
+                ],
+            },
         ]
+
 
     async def _handle_command(
         self,

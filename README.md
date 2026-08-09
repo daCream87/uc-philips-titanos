@@ -132,3 +132,14 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 - Physical STOP, PREV, NEXT and RECORD use the same standard `send_cmd` structure.
 - The numeric keypad remains unchanged.
 - Apps page keeps only CHANNELS, the app-style function confirmed working on this TV.
+
+
+## v0.8.3 – Page order cleanup
+
+- Ziffern is now the second page directly after Steuerung.
+- The separate Apps page has been removed completely.
+- CHANNELS moved to the Medien page.
+- Medien now contains PREV, REW, PLAY, FF, NEXT, PAUSE, STOP, REC and CHANNELS.
+- SOURCE remains only once on the Steuerung page.
+- Settings is shown as plain white text for reliable rendering.
+- Numeric keypad remains unchanged.
