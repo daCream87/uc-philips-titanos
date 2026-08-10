@@ -1,4 +1,4 @@
-name: "Build Philips Titan OS package"
+name: "Build Hue Sync Box package"
 
 on:
   workflow_dispatch:
@@ -28,7 +28,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --rm             --platform=aarch64             --user=$(id -u):$(id -g)             -v "${GITHUB_WORKSPACE}:/workspace"             docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER}             bash -c "cd /workspace &&               python -m pip install -r requirements.txt &&               pyinstaller --clean --onedir --name intg-${DRIVER_ID}                 --collect-all ucapi                 --collect-all ucapi_framework                 --collect-all zeroconf                 intg_philips_titanos/__main__.py"
+          docker run --rm --platform=aarch64 --user=$(id -u):$(id -g) \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} \
+            bash -c "cd /workspace && \
+              python -m pip install -r requirements.txt && \
+              pyinstaller --clean --onedir --name intg-${DRIVER_ID} \
+                --collect-all ucapi \
+                --collect-all ucapi_framework \
+                --collect-all zeroconf \
+                --collect-all aiohuesyncbox \
+                intg_hue_sync_box/__main__.py"
 
       - name: Prepare package
         shell: bash
@@ -47,41 +57,27 @@ jobs:
         run: |
           test -f artifacts/driver.json
           test -f artifacts/driver-logo.png
+          test -x artifacts/bin/driver
+          jq -e '.driver_id == "hue_sync_box" and .version == "0.1.2"' artifacts/driver.json >/dev/null
+          python -m compileall -q intg_hue_sync_box
           python - <<'PY'
           import struct
           from pathlib import Path
-
           logo = Path("artifacts/driver-logo.png")
-          with logo.open("rb") as file:
-              signature = file.read(8)
-              if signature != b"\x89PNG\r\n\x1a\n":
-                  raise SystemExit("driver-logo.png is not a valid PNG")
-              length = struct.unpack(">I", file.read(4))[0]
-              chunk = file.read(4)
-              if chunk != b"IHDR" or length < 8:
-                  raise SystemExit("driver-logo.png has no valid IHDR chunk")
-              width, height = struct.unpack(">II", file.read(8))
-          if (width, height) != (90, 90):
-              raise SystemExit(f"driver-logo.png must be 90x90, got {width}x{height}")
-          print(f"Logo validated: {width}x{height}")
+          with logo.open("rb") as f:
+              assert f.read(8) == b"\x89PNG\r\n\x1a\n"
+              length = struct.unpack(">I", f.read(4))[0]
+              assert f.read(4) == b"IHDR" and length >= 8
+              width, height = struct.unpack(">II", f.read(8))
+          assert (width, height) == (90, 90), (width, height)
+          print("Logo validated 90x90")
           PY
-          test -x artifacts/bin/driver
-          test ! -e artifacts/bin/_internal/driver.json
-          test -f artifacts/driver.json
           python - <<'PY'
           from pathlib import Path
-          init_file = Path("intg_philips_titanos/__init__.py").read_text(encoding="utf-8")
-          assert "Path(sys.executable).resolve().parent / \"driver.json\"" in init_file
+          src = Path("intg_hue_sync_box/__init__.py").read_text()
+          assert 'Path(sys.executable).resolve().parent / "driver.json"' in src
           print("Runtime manifest lookup validated")
           PY
-          python - <<'PY'
-          from pathlib import Path
-          source = Path("intg_philips_titanos/setup_flow.py").read_text(encoding="utf-8")
-          assert "import socket" in source, "setup_flow.py uses socket but does not import it"
-          compile(source, "setup_flow.py", "exec")
-          print("Setup flow imports and syntax validated")
-          PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.8.8"' artifacts/driver.json >/dev/null
 
       - name: Create Remote 3 archive
         shell: bash

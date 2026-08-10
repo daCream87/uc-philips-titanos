@@ -1,0 +1,15 @@
+INPUTS = ("input1", "input2", "input3", "input4")
+SYNC_MODES = ("video", "game", "music")
+INTENSITIES = ("subtle", "moderate", "high", "intense")
+
+SUPPORTED_COMMANDS = [
+    "POWER_TOGGLE", "POWER_ON", "POWER_OFF",
+    "SYNC_TOGGLE", "SYNC_ON", "SYNC_OFF",
+    "HDMI_1", "HDMI_2", "HDMI_3", "HDMI_4",
+    "HDMI_PREVIOUS", "HDMI_NEXT",
+    "MODE_VIDEO", "MODE_GAME", "MODE_MUSIC",
+    "MODE_PREVIOUS", "MODE_NEXT",
+    "INTENSITY_SUBTLE", "INTENSITY_MODERATE", "INTENSITY_HIGH", "INTENSITY_INTENSE",
+    "INTENSITY_PREVIOUS", "INTENSITY_NEXT",
+    "BRIGHTNESS_DOWN", "BRIGHTNESS_UP",
+]
