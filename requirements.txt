@@ -1,5 +1,6 @@
 ucapi>=0.7.0,<0.8
 ucapi-framework>=1.9.5,<2
-aiohuesyncbox==0.0.31
-aiohttp>=3.9.0,<4
+requests>=2.31.0,<3
 zeroconf>=0.132.0
+httpx>=0.28.1,<1
+cryptography>=46,<51
