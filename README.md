@@ -157,3 +157,9 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Uses the project `assets/driver-logo.png` as both driver icon and UC Remote entity icon.
 - The entity explicitly sets `icon="custom:driver-logo.png"`, matching the proven Music Play implementation.
 - No changes to entity ID, pairing, reconnect, commands, setup, configuration or UI behavior.
+
+
+## v0.9.0 – Public project icon
+- Replaced the previous Philips-wordmark-style artwork with the new project icon.
+- `assets/driver-logo.png` is used both as driver icon and directly on the UC entity.
+- No changes to pairing, reconnect, commands, entity ID, setup, configuration or UI behavior.
