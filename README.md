@@ -149,32 +149,11 @@ Fixed the setup crash `NameError: socket is not defined` by restoring the requir
 Restored the four colour buttons as red, green, yellow and blue dots on the main control page.
 
 
-## v0.8.5 – Configurator locale fix
-
-- Normalized Configurator-facing names to locale dictionaries.
-- Added both `de`/`en` and `de_DE`/`en_US` variants where relevant.
-- Converted Remote entity display name and page titles from raw strings to locale objects.
-- No changes to pairing, Philips communication, key mappings or page layout.
+## Clean branch rebuild
+Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 
 
-## v0.8.6 – Configurator compatibility rollback
-
-- Reverted v0.8.5 locale-object changes for Remote entity and page names.
-- UI page names are plain strings again.
-- Remote entity display name is a plain string again.
-- Removed `de_DE` / `en_US` variants from runtime source.
-- Kept the working v0.8.4 control logic and layout unchanged.
-- This build is intended to distinguish integration metadata issues from
-  stale Configurator/Core entity metadata.
-
-
-## v0.8.8 – Preserve existing entity / minimal Configurator metadata
-
-- Keeps the existing Remote entity id `remote.<device-id>` unchanged.
-- Existing Activities and button assignments can therefore continue to reference the same entity.
-- Removes prior `de_DE` / `en_US` runtime locale experiments.
-- Keeps Remote entity and UI page names as plain strings.
-- Leaves pairing, Philips communication, touchscreen layout, physical buttons,
-  numeric keypad, Channels and colour-key behavior unchanged.
-- This is a minimal compatibility build intended to avoid Configurator locale parsing
-  without forcing a new entity registration.
+## v0.8.9 – Entity icon
+- Uses the project `assets/driver-logo.png` as both driver icon and UC Remote entity icon.
+- The entity explicitly sets `icon="custom:driver-logo.png"`, matching the proven Music Play implementation.
+- No changes to entity ID, pairing, reconnect, commands, setup, configuration or UI behavior.

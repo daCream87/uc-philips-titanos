@@ -27,6 +27,7 @@ class PhilipsRemote(RemoteEntity):
             simple_commands=SUPPORTED_COMMANDS,
             button_mapping=self._button_mapping(),
             ui_pages=self._ui_pages(),
+            icon="custom:driver-logo.png",
             cmd_handler=self._handle_command,
         )
         self.subscribe_to_device(device)
