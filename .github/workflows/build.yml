@@ -39,30 +39,30 @@ jobs:
           mv "artifacts/bin/intg-${DRIVER_ID}" artifacts/bin/driver
           chmod 755 artifacts/bin/driver
           cp driver.json artifacts/
-          cp assets/driver-logo.png artifacts/
+          cp assets/philips-titanos-logo.png artifacts/
           echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
 
       - name: Validate
         shell: bash
         run: |
           test -f artifacts/driver.json
-          test -f artifacts/driver-logo.png
+          test -f artifacts/philips-titanos-logo.png
           python - <<'PY'
           import struct
           from pathlib import Path
 
-          logo = Path("artifacts/driver-logo.png")
+          logo = Path("artifacts/philips-titanos-logo.png")
           with logo.open("rb") as file:
               signature = file.read(8)
               if signature != b"\x89PNG\r\n\x1a\n":
-                  raise SystemExit("driver-logo.png is not a valid PNG")
+                  raise SystemExit("philips-titanos-logo.png is not a valid PNG")
               length = struct.unpack(">I", file.read(4))[0]
               chunk = file.read(4)
               if chunk != b"IHDR" or length < 8:
-                  raise SystemExit("driver-logo.png has no valid IHDR chunk")
+                  raise SystemExit("philips-titanos-logo.png has no valid IHDR chunk")
               width, height = struct.unpack(">II", file.read(8))
           if (width, height) != (90, 90):
-              raise SystemExit(f"driver-logo.png must be 90x90, got {width}x{height}")
+              raise SystemExit(f"philips-titanos-logo.png must be 90x90, got {width}x{height}")
           print(f"Logo validated: {width}x{height}")
           PY
           test -x artifacts/bin/driver
@@ -81,13 +81,28 @@ jobs:
           compile(source, "setup_flow.py", "exec")
           print("Setup flow imports and syntax validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.9.0"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.9.1"' artifacts/driver.json >/dev/null
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          expected = "custom:philips-titanos-logo.png"
+          manifest = json.loads(Path("driver.json").read_text(encoding="utf-8"))
+          entity = Path("intg_philips_titanos/remote.py").read_text(encoding="utf-8")
+
+          assert manifest["icon"] == expected, (manifest["icon"], expected)
+          assert expected in entity, "Entity does not reference unique custom icon"
+          assert Path("assets/philips-titanos-logo.png").is_file()
+          assert Path("artifacts/philips-titanos-logo.png").is_file()
+          print("Unique icon binding validated:", expected)
+          PY
 
       - name: Create Remote 3 archive
         shell: bash
         run: |
           cd artifacts
-          tar czf "../${ARTIFACT_NAME}.tar.gz" ./driver-logo.png ./driver.json ./bin/
+          tar czf "../${ARTIFACT_NAME}.tar.gz" ./philips-titanos-logo.png ./driver.json ./bin/
           cd ..
           tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
 

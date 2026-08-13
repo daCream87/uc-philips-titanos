@@ -159,7 +159,15 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - No changes to entity ID, pairing, reconnect, commands, setup, configuration or UI behavior.
 
 
-## v0.9.0 – Public project icon
+## v0.9.1 – Public project icon
 - Replaced the previous Philips-wordmark-style artwork with the new project icon.
 - `assets/driver-logo.png` is used both as driver icon and directly on the UC entity.
 - No changes to pairing, reconnect, commands, entity ID, setup, configuration or UI behavior.
+
+
+## 0.9.1 entity icon fix
+- Keeps `assets/driver-logo.png` as the original/legacy source asset.
+- Adds the integration-unique entity resource `assets/philips-titanos-logo.png`.
+- `driver.json` and the registered UC entity both reference `custom:philips-titanos-logo.png`.
+- The GitHub Actions package includes `philips-titanos-logo.png` at archive root, matching the working Music Play resource pattern.
+- Build validation now fails if manifest, entity and packaged icon names diverge.
