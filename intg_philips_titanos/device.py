@@ -101,6 +101,30 @@ class PhilipsDevice(PollingDevice):
     async def send_command(self, command: str) -> bool:
         if command == "POWER_TOGGLE":
             return await self.power_toggle()
+        if command == "POWER_OFF":
+            # Avoid recursion through power_off(): send the Standby key directly,
+            # then publish OFF immediately once accepted.
+            keys = KEY_CANDIDATES.get(command)
+            if not keys:
+                return False
+            last_error = None
+            for key in keys:
+                try:
+                    await self._client.send_key(key)
+                    _LOG.info("[%s] Command sent: %s -> %s", self.log_id, command, key)
+                    self._state.power = "STANDBY"
+                    self._state.online = False
+                    self.push_update()
+                    _LOG.info("[%s] Standby accepted; power state updated to OFF immediately", self.log_id)
+                    return True
+                except Exception as err:
+                    last_error = err
+                    _LOG.debug("[%s] Candidate key failed: %s -> %s: %s", self.log_id, command, key, err)
+            if isinstance(last_error, PhilipsConnectionError):
+                _LOG.error("[%s] Network error sending %s: %s", self.log_id, command, last_error)
+            else:
+                _LOG.error("[%s] All key candidates failed for %s: %s", self.log_id, command, last_error)
+            return False
 
         keys = KEY_CANDIDATES.get(command)
         if not keys:

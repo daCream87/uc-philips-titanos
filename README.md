@@ -171,3 +171,14 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - `driver.json` and the registered UC entity both reference `custom:philips-titanos-logo.png`.
 - The GitHub Actions package includes `philips-titanos-logo.png` at archive root, matching the working Music Play resource pattern.
 - Build validation now fails if manifest, entity and packaged icon names diverge.
+
+## v0.9.2
+
+- Keep Philips TV HTTP connection and polling active when Remote 3 enters display standby.
+- Avoid unnecessary reconnect on `exit_standby`; normal PollingDevice recovery remains active for real network/TV outages.
+
+## v0.9.3
+
+- Keep the existing device connection alive during Remote 3 display standby.
+- Reduce background polling during standby to 15 seconds; restore 3 seconds on wake without reconnecting.
+- Update the Remote power state immediately after a successful TV standby command, while normal polling continues to verify the real state.

@@ -81,7 +81,7 @@ jobs:
           compile(source, "setup_flow.py", "exec")
           print("Setup flow imports and syntax validated")
           PY
-          jq -e '.driver_id == "philips_titanos" and .version == "0.9.1"' artifacts/driver.json >/dev/null
+          jq -e '.driver_id == "philips_titanos" and .version == "0.9.3"' artifacts/driver.json >/dev/null
 
           python - <<'PY'
           import json
