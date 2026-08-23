@@ -1,5 +1,18 @@
 # Philips Titan OS TV for Unfolded Circle Remote 3
 
+> **Unofficial community integration.** This project is not affiliated with, endorsed by, or supported by Philips, TP Vision, Titan OS, or Unfolded Circle.
+
+## Download / Installation
+
+Ready-to-install packages for the Unfolded Circle Remote 3 are available under [GitHub Releases](../../releases).
+
+1. Open the [latest GitHub Release](../../releases/latest).
+2. Download the `uc-intg-philips_titanos-<version>-aarch64.tar.gz` asset.
+3. Install this archive through the Unfolded Circle Remote 3 custom integration interface.
+
+> **Note:** Do not use the auto-generated "Source code" archives attached by GitHub.
+> Only the `uc-intg-philips_titanos-*-aarch64.tar.gz` asset is the ready-to-install Remote 3 package.
+
 Direct local-network integration for Philips Titan OS TVs using JointSpace API 6.
 
 ## Tested TV
