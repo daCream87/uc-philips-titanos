@@ -137,12 +137,16 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           RELEASE_TITLE="Philips Titan OS ${TAG}"
-          gh release create "$TAG" \
-            "${ARTIFACT_NAME}.tar.gz" \
-            --title "$RELEASE_TITLE" \
-            --generate-notes \
-            --repo "$GITHUB_REPOSITORY" || \
-          gh release upload "$TAG" \
-            "${ARTIFACT_NAME}.tar.gz" \
-            --clobber \
-            --repo "$GITHUB_REPOSITORY"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, updating asset"
+            gh release upload "$TAG" \
+              "${ARTIFACT_NAME}.tar.gz" \
+              --clobber \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" \
+              "${ARTIFACT_NAME}.tar.gz" \
+              --title "$RELEASE_TITLE" \
+              --generate-notes \
+              --repo "$GITHUB_REPOSITORY"
+          fi
