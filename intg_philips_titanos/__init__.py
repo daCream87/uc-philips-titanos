@@ -12,7 +12,7 @@ from intg_philips_titanos.config import PhilipsConfig
 from intg_philips_titanos.driver import PhilipsDriver
 from intg_philips_titanos.setup_flow import PhilipsSetupFlow
 
-__version__ = "0.9.3"
+__version__ = "0.9.11"
 _LOG = logging.getLogger(__name__)
 
 

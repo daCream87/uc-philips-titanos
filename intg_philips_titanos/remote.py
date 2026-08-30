@@ -147,18 +147,17 @@ class PhilipsRemote(RemoteEntity):
                     self._text("CH −", 0, 5, "CHANNEL_DOWN"),
                     self._text("CH +", 3, 5, "CHANNEL_UP"),
 
-                    # HDMI controls deliberately live on the already proven control page.
-                    # This avoids relying on the Remote to adopt a newly added page for an
-                    # already configured entity.
-                    self._text("HDMI 1", 0, 6, "HDMI_1"),
-                    self._text("HDMI 2", 1, 6, "HDMI_2"),
-                    self._text("HDMI 3", 2, 6, "HDMI_3"),
-                    self._text("HDMI 4", 3, 6, "HDMI_4"),
+                    self._text("🔴", 0, 6, "RED"),
+                    self._text("🟢", 1, 6, "GREEN"),
+                    self._text("🟡", 2, 6, "YELLOW"),
+                    self._text("🔵", 3, 6, "BLUE"),
 
-                    self._text("🔴", 0, 7, "RED"),
-                    self._text("🟢", 1, 7, "GREEN"),
-                    self._text("🟡", 2, 7, "YELLOW"),
-                    self._text("🔵", 3, 7, "BLUE"),
+                    # v0.9.11 temporary diagnostics: four independent raw HDMI-1
+                    # key spellings. Each button sends exactly one key.
+                    self._text("Hdmi1", 0, 7, "HDMI1_TEST_A"),
+                    self._text("HDMI1", 1, 7, "HDMI1_TEST_B"),
+                    self._text("SrcHdmi1", 2, 7, "HDMI1_TEST_C"),
+                    self._text("SrcHDMI1", 3, 7, "HDMI1_TEST_D"),
 
                 ],
             },

@@ -247,3 +247,15 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Places HDMI 1–4 directly on the established `Steuerung` page in one dedicated row.
 - Keeps SOURCE, navigation, volume, channels, colour keys, number pad and media page unchanged.
 - Keeps automatic main-branch build and GitHub Release packaging.
+
+
+## v0.9.10 – HDMI row below colour keys
+- Keeps page 1 (Steuerung) at 4×8.
+- Keeps the colour keys in row 7 (y=6).
+- Adds HDMI 1–4 in the final row below them (y=7).
+- Source switching commands remain experimental; this release changes the UI placement only.
+
+
+### v0.9.11 temporary HDMI key diagnostics
+
+The final row on the Steuerung page contains four independent HDMI 1 raw-key tests: `Hdmi1`, `HDMI1`, `SourceHdmi1`, and `SourceHDMI1`. Each button sends exactly one raw key, avoiding the HTTP-200 fallback masking seen in earlier builds. Existing pairing credentials and all other controls remain unchanged.

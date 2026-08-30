@@ -16,6 +16,13 @@ KEY_CANDIDATES = {
     "HDMI_2": ["Hdmi2", "HDMI2", "SourceHdmi2", "SourceHDMI2"],
     "HDMI_3": ["Hdmi3", "HDMI3", "SourceHdmi3", "SourceHDMI3"],
     "HDMI_4": ["Hdmi4", "HDMI4", "SourceHdmi4", "SourceHDMI4"],
+
+    # v0.9.11 temporary HDMI-1 diagnostics: each command sends exactly one
+    # raw Philips key so HTTP 200 on one spelling cannot mask the others.
+    "HDMI1_TEST_A": ["Hdmi1"],
+    "HDMI1_TEST_B": ["HDMI1"],
+    "HDMI1_TEST_C": ["SourceHdmi1"],
+    "HDMI1_TEST_D": ["SourceHDMI1"],
     "CURSOR_UP": ["CursorUp"],
     "CURSOR_DOWN": ["CursorDown"],
     "CURSOR_LEFT": ["CursorLeft"],
