@@ -259,3 +259,7 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 ### v0.9.11 temporary HDMI key diagnostics
 
 The final row on the Steuerung page contains four independent HDMI 1 raw-key tests: `Hdmi1`, `HDMI1`, `SourceHdmi1`, and `SourceHDMI1`. Each button sends exactly one raw key, avoiding the HTTP-200 fallback masking seen in earlier builds. Existing pairing credentials and all other controls remain unchanged.
+
+
+## v0.9.12 HDMI discovery
+Temporary diagnostic build: the `HDMI DISCOVERY` button probes known JointSpace source endpoints, raw HDMI/F1-F4 keys and legacy `sources/current` payloads through the existing paired Remote 3 connection. Results are written to the integration log. HTTP 200 is logged but is not treated as proof of switching.

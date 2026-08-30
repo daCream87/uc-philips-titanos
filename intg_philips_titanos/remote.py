@@ -152,12 +152,8 @@ class PhilipsRemote(RemoteEntity):
                     self._text("🟡", 2, 6, "YELLOW"),
                     self._text("🔵", 3, 6, "BLUE"),
 
-                    # v0.9.11 temporary diagnostics: four independent raw HDMI-1
-                    # key spellings. Each button sends exactly one key.
-                    self._text("Hdmi1", 0, 7, "HDMI1_TEST_A"),
-                    self._text("HDMI1", 1, 7, "HDMI1_TEST_B"),
-                    self._text("SrcHdmi1", 2, 7, "HDMI1_TEST_C"),
-                    self._text("SrcHDMI1", 3, 7, "HDMI1_TEST_D"),
+                    # v0.9.12: one controlled discovery run using the existing pairing.
+                    self._text("HDMI DISCOVERY", 0, 7, "HDMI_DISCOVERY", 4),
 
                 ],
             },

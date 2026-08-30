@@ -176,6 +176,76 @@ class PhilipsJointSpaceClient:
                 _LOG.debug("SOURCE_WATCH ERROR endpoint=/%s/%s type=%s error=%s",
                            self.api_version, endpoint, type(err).__name__, err)
 
+
+    async def source_discovery(self) -> dict[str, Any]:
+        """Probe known JointSpace/Titan source mechanisms and log all results.
+
+        Uses the existing authenticated Remote 3 connection. It deliberately
+        avoids destructive settings calls. Key candidates are sent one at a
+        time and activity is sampled after each attempt.
+        """
+        await self.start()
+        assert self._client is not None
+        results: dict[str, Any] = {}
+        _LOG.warning("HDMI_DISCOVERY START base=%s", self.base)
+
+        # First inventory endpoints. Non-2xx responses are useful evidence.
+        gets = (
+            "system", "activities/current", "activities/tv", "activities",
+            "sources", "sources/current", "input/sources", "currentactivity",
+            "applications", "mappings", "menuitems/settings/current",
+        )
+        for endpoint in gets:
+            url = f"{self.base}/{endpoint}"
+            try:
+                r = await self._client.get(url)
+                body = " ".join(r.text.split())[:4000]
+                _LOG.warning("HDMI_DISCOVERY GET endpoint=/%s/%s status=%s body=%s",
+                             self.api_version, endpoint, r.status_code, body)
+                results[f"GET {endpoint}"] = r.status_code
+            except Exception as err:
+                _LOG.warning("HDMI_DISCOVERY GET endpoint=/%s/%s error=%s",
+                             self.api_version, endpoint, err)
+
+        # Raw keys seen across Philips/JointSpace implementations. A 200 alone
+        # is NOT considered success; the post-attempt activity is logged.
+        keys = (
+            "Hdmi1", "HDMI1", "SourceHdmi1", "SourceHDMI1",
+            "Hdmi2", "HDMI2", "SourceHdmi2", "SourceHDMI2",
+            "Hdmi3", "HDMI3", "SourceHdmi3", "SourceHDMI3",
+            "Hdmi4", "HDMI4", "SourceHdmi4", "SourceHDMI4",
+            "F1", "F2", "F3", "F4",
+        )
+        for key in keys:
+            try:
+                r = await self._client.post(f"{self.base}/input/key", json={"key": key})
+                _LOG.warning("HDMI_DISCOVERY KEY key=%s status=%s body=%s",
+                             key, r.status_code, " ".join(r.text.split())[:1000])
+            except Exception as err:
+                _LOG.warning("HDMI_DISCOVERY KEY key=%s error=%s", key, err)
+            await asyncio.sleep(0.8)
+            try:
+                r = await self._client.get(f"{self.base}/activities/current")
+                _LOG.warning("HDMI_DISCOVERY AFTER key=%s activity_status=%s activity=%s",
+                             key, r.status_code, " ".join(r.text.split())[:2000])
+            except Exception as err:
+                _LOG.warning("HDMI_DISCOVERY AFTER key=%s error=%s", key, err)
+
+        # Legacy source-current payloads. Modern API 6 often rejects these,
+        # but testing them establishes whether this Titan firmware retained it.
+        for source_id in ("hdmi1","hdmi2","hdmi3","hdmi4","hdm1","hdm2","hdm3","hdm4"):
+            url = f"{self.base}/sources/current"
+            try:
+                r = await self._client.post(url, json={"id": source_id})
+                _LOG.warning("HDMI_DISCOVERY SOURCE_CURRENT id=%s status=%s body=%s",
+                             source_id, r.status_code, " ".join(r.text.split())[:1000])
+            except Exception as err:
+                _LOG.warning("HDMI_DISCOVERY SOURCE_CURRENT id=%s error=%s", source_id, err)
+            await asyncio.sleep(0.5)
+
+        _LOG.warning("HDMI_DISCOVERY END")
+        return results
+
     async def read_state(self) -> TvState:
         state = TvState()
         try:

@@ -107,7 +107,7 @@ jobs:
           expected = "custom:philips-titanos-logo.png"
           entity = Path("intg_philips_titanos/remote.py").read_text(encoding="utf-8")
           assert expected in entity
-          assert all(x in entity for x in ("HDMI1_TEST_A", "HDMI1_TEST_B", "HDMI1_TEST_C", "HDMI1_TEST_D"))
+          assert "HDMI_DISCOVERY" in entity
           print("Entity icon and HDMI-1 raw-key diagnostics validated")
           PY
 

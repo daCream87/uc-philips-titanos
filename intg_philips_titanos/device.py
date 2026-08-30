@@ -99,6 +99,13 @@ class PhilipsDevice(PollingDevice):
         return await self.power_on()
 
     async def send_command(self, command: str) -> bool:
+        if command == "HDMI_DISCOVERY":
+            try:
+                await self._client.source_discovery()
+                return True
+            except Exception:
+                _LOG.exception("[%s] HDMI discovery failed", self.log_id)
+                return False
         if command == "POWER_TOGGLE":
             return await self.power_toggle()
         if command == "POWER_OFF":
