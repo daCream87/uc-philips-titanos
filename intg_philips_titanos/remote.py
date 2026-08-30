@@ -122,7 +122,7 @@ class PhilipsRemote(RemoteEntity):
             {
                 "page_id": "control",
                 "name": "Steuerung",
-                "grid": {"width": 4, "height": 7},
+                "grid": {"width": 4, "height": 8},
                 "items": [
                     self._text("POWER", 0, 0, "POWER_TOGGLE"),
                     self._text("HOME", 1, 0, "HOME"),
@@ -147,22 +147,19 @@ class PhilipsRemote(RemoteEntity):
                     self._text("CH −", 0, 5, "CHANNEL_DOWN"),
                     self._text("CH +", 3, 5, "CHANNEL_UP"),
 
-                    self._text("🔴", 0, 6, "RED"),
-                    self._text("🟢", 1, 6, "GREEN"),
-                    self._text("🟡", 2, 6, "YELLOW"),
-                    self._text("🔵", 3, 6, "BLUE"),
+                    # HDMI controls deliberately live on the already proven control page.
+                    # This avoids relying on the Remote to adopt a newly added page for an
+                    # already configured entity.
+                    self._text("HDMI 1", 0, 6, "HDMI_1"),
+                    self._text("HDMI 2", 1, 6, "HDMI_2"),
+                    self._text("HDMI 3", 2, 6, "HDMI_3"),
+                    self._text("HDMI 4", 3, 6, "HDMI_4"),
 
-                ],
-            },
-            {
-                "page_id": "inputs",
-                "name": "Eingänge",
-                "grid": {"width": 2, "height": 2},
-                "items": [
-                    self._text("HDMI 1", 0, 0, "HDMI_1"),
-                    self._text("HDMI 2", 1, 0, "HDMI_2"),
-                    self._text("HDMI 3", 0, 1, "HDMI_3"),
-                    self._text("HDMI 4", 1, 1, "HDMI_4"),
+                    self._text("🔴", 0, 7, "RED"),
+                    self._text("🟢", 1, 7, "GREEN"),
+                    self._text("🟡", 2, 7, "YELLOW"),
+                    self._text("🔵", 3, 7, "BLUE"),
+
                 ],
             },
             {

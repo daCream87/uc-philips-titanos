@@ -239,3 +239,11 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Keeps the proven Steuerung, Ziffern and Medien pages unchanged.
 - Keeps SOURCE and all existing physical/button mappings unchanged.
 - Keeps automatic build + GitHub Release creation on pushes to `main`.
+
+
+## v0.9.9 – HDMI controls on existing control page
+
+- Removes the separate `Eingänge` page from v0.9.8.
+- Places HDMI 1–4 directly on the established `Steuerung` page in one dedicated row.
+- Keeps SOURCE, navigation, volume, channels, colour keys, number pad and media page unchanged.
+- Keeps automatic main-branch build and GitHub Release packaging.
