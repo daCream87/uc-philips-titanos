@@ -28,6 +28,7 @@ class PhilipsJointSpaceClient:
         self.verify_tls, self.timeout = verify_tls, timeout
         self.secured_transport = secured_transport
         self._client: httpx.AsyncClient | None = None
+        self._source_watch_last: dict[str, str] = {}
         self._rebuild_base()
 
     def _rebuild_base(self) -> None:
@@ -131,12 +132,14 @@ class PhilipsJointSpaceClient:
             try:
                 response = await self._client.get(url)
                 body = response.text
-                _LOG.info("SOURCE_DIAG HTTP %s endpoint=/%s/%s", response.status_code, self.api_version, endpoint)
-                _LOG.info("SOURCE_DIAG RESPONSE endpoint=/%s/%s body=%s", self.api_version, endpoint, body)
                 try:
                     parsed = response.json() if response.content else None
+                    rendered = json.dumps(parsed, ensure_ascii=False, separators=(",", ":"))
                 except Exception:
                     parsed = body
+                    rendered = " ".join(body.split())
+                _LOG.info("SOURCE_DIAG HTTP %s endpoint=/%s/%s", response.status_code, self.api_version, endpoint)
+                _LOG.info("SOURCE_DIAG RESPONSE endpoint=/%s/%s body=%s", self.api_version, endpoint, rendered)
                 results[endpoint] = {"status": response.status_code, "response": parsed}
             except Exception as err:
                 results[endpoint] = {"error": f"{type(err).__name__}: {err}"}
@@ -144,6 +147,34 @@ class PhilipsJointSpaceClient:
                                self.api_version, endpoint, type(err).__name__, err)
         _LOG.info("SOURCE_DIAG END")
         return results
+
+
+    async def watch_source_activity(self) -> None:
+        """Log compact source/activity responses only when they change.
+
+        This is diagnostic-only and performs GET requests. It lets a tester switch
+        inputs on the TV and later correlate each input with the JointSpace payload.
+        """
+        await self.start()
+        assert self._client is not None
+        for endpoint in ("activities/current", "activities/tv"):
+            url = f"{self.base}/{endpoint}"
+            try:
+                response = await self._client.get(url)
+                if response.status_code != 200:
+                    continue
+                try:
+                    parsed = response.json() if response.content else None
+                    rendered = json.dumps(parsed, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+                except Exception:
+                    rendered = " ".join(response.text.split())
+                if self._source_watch_last.get(endpoint) != rendered:
+                    self._source_watch_last[endpoint] = rendered
+                    _LOG.info("SOURCE_WATCH CHANGE endpoint=/%s/%s body=%s",
+                              self.api_version, endpoint, rendered)
+            except Exception as err:
+                _LOG.debug("SOURCE_WATCH ERROR endpoint=/%s/%s type=%s error=%s",
+                           self.api_version, endpoint, type(err).__name__, err)
 
     async def read_state(self) -> TvState:
         state = TvState()

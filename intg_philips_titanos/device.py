@@ -51,12 +51,6 @@ class PhilipsDevice(PollingDevice):
     async def establish_connection(self):
         await self._client.start()
         await self.poll_device()
-        # Diagnostic-only probe: read source/activity metadata once per connection.
-        # Failures are intentionally non-fatal and do not affect normal TV control.
-        try:
-            await self._client.diagnose_sources()
-        except Exception:
-            _LOG.debug("[%s] Source diagnostics failed unexpectedly", self.log_id, exc_info=True)
         return self._client
 
     async def disconnect(self):
@@ -81,6 +75,15 @@ class PhilipsDevice(PollingDevice):
                         _LOG.exception("[%s] SOURCE_DIAG fatal diagnostic error", self.log_id)
                     finally:
                         self._source_diag_done = True
+
+        # v0.9.6: watch the endpoints that actually answered on this Titan OS TV.
+        # Responses are compact JSON and only logged when their content changes,
+        # making HDMI/input switching easy to correlate without flooding the log.
+        if self._state.online:
+            try:
+                await self._client.watch_source_activity()
+            except Exception:
+                _LOG.debug("[%s] SOURCE_WATCH failed", self.log_id, exc_info=True)
 
     async def power_on(self) -> bool:
         if not self._config.mac:

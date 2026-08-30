@@ -211,3 +211,12 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Runs `SOURCE_DIAG` once after the first successful TV API poll.
 - Logs HTTP status and the complete raw response for each tested source/activity endpoint.
 - Diagnostic requests are read-only and do not change TV control behaviour.
+
+
+## v0.9.6 – Input activity watcher
+
+- Prevents the startup source diagnostic from being triggered twice.
+- Logs diagnostic JSON compactly on a single line.
+- Watches the confirmed `activities/current` and `activities/tv` endpoints while the TV is online.
+- Writes `SOURCE_WATCH CHANGE` only when a response actually changes, so input switches can be correlated with their JointSpace payloads.
+- No source switching or existing remote-control behaviour is changed in this diagnostic build.
