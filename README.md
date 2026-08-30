@@ -220,3 +220,13 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Watches the confirmed `activities/current` and `activities/tv` endpoints while the TV is online.
 - Writes `SOURCE_WATCH CHANGE` only when a response actually changes, so input switches can be correlated with their JointSpace payloads.
 - No source switching or existing remote-control behaviour is changed in this diagnostic build.
+
+
+## v0.9.7 – HDMI test controls and automatic releases
+
+- Adds HDMI 1–4 test commands while keeping the proven SOURCE command.
+- Removes the temporary v0.9.5/v0.9.6 source diagnostic polling from normal operation.
+- GitHub Actions now builds automatically on every push to `main`.
+- The version in `driver.json` is used as the release tag (`vX.Y.Z`).
+- If that release already exists, the build is validated but no duplicate release is created.
+- The validated Remote 3 `.tar.gz` is attached directly to the GitHub Release.

@@ -25,8 +25,6 @@ class PhilipsDevice(PollingDevice):
             secured_transport=device_config.secured_transport,
         )
         self._state = TvState()
-        self._source_diag_done = False
-        self._source_diag_lock = asyncio.Lock()
 
     @property
     def identifier(self):
@@ -60,30 +58,6 @@ class PhilipsDevice(PollingDevice):
     async def poll_device(self):
         self._state = await self._client.read_state()
         self.push_update()
-
-        # v0.9.5 diagnostics: run exactly once after the first confirmed
-        # successful TV API poll. This path is used by the active polling loop,
-        # so diagnostics do not depend on establish_connection() being called by
-        # a particular ucapi_framework lifecycle version.
-        if self._state.online and not self._source_diag_done:
-            async with self._source_diag_lock:
-                if not self._source_diag_done:
-                    _LOG.info("[%s] SOURCE_DIAG trigger=first_successful_poll", self.log_id)
-                    try:
-                        await self._client.diagnose_sources()
-                    except Exception:
-                        _LOG.exception("[%s] SOURCE_DIAG fatal diagnostic error", self.log_id)
-                    finally:
-                        self._source_diag_done = True
-
-        # v0.9.6: watch the endpoints that actually answered on this Titan OS TV.
-        # Responses are compact JSON and only logged when their content changes,
-        # making HDMI/input switching easy to correlate without flooding the log.
-        if self._state.online:
-            try:
-                await self._client.watch_source_activity()
-            except Exception:
-                _LOG.debug("[%s] SOURCE_WATCH failed", self.log_id, exc_info=True)
 
     async def power_on(self) -> bool:
         if not self._config.mac:

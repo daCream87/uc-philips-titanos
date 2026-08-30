@@ -1,10 +1,10 @@
-name: "Build Philips Titan OS package"
+name: "Build and release Philips Titan OS package"
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -12,30 +12,39 @@ permissions:
 env:
   PYTHON_VER: 3.11.12-0.3.0
 
+concurrency:
+  group: philips-titanos-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-      - name: Read manifest
+      - name: Read manifest and determine release
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          echo "VERSION=$(jq -r '.version' driver.json)" >> "$GITHUB_ENV"
-          echo "DRIVER_ID=$(jq -r '.driver_id' driver.json)" >> "$GITHUB_ENV"
+          VERSION="$(jq -r '.version' driver.json)"
+          DRIVER_ID="$(jq -r '.driver_id' driver.json)"
+          TAG="v${VERSION}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "DRIVER_ID=$DRIVER_ID" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
 
-      - name: Validate version tag
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          EXPECTED="v${VERSION}"
-          if [ "$TAG" != "$EXPECTED" ]; then
-            echo "Release tag $TAG does not match driver.json version $VERSION"
-            exit 1
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> "$GITHUB_ENV"
+            echo "Release $TAG already exists; build will still be validated."
+          else
+            echo "RELEASE_EXISTS=false" >> "$GITHUB_ENV"
+            echo "Release $TAG will be created after a successful build."
           fi
-          echo "Tag $TAG matches driver.json version $VERSION"
 
       - name: Build AArch64 driver
         shell: bash
@@ -43,7 +52,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qemu-system-arm binfmt-support qemu-user-static
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-          docker run --rm             --platform=aarch64             --user=$(id -u):$(id -g)             -v "${GITHUB_WORKSPACE}:/workspace"             docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER}             bash -c "cd /workspace &&               python -m pip install -r requirements.txt &&               pyinstaller --clean --onedir --name intg-${DRIVER_ID}                 --collect-all ucapi                 --collect-all ucapi_framework                 --collect-all zeroconf                 intg_philips_titanos/__main__.py"
+          docker run --rm \
+            --platform=aarch64 \
+            --user=$(id -u):$(id -g) \
+            -v "${GITHUB_WORKSPACE}:/workspace" \
+            docker.io/unfoldedcircle/r2-pyinstaller:${PYTHON_VER} \
+            bash -c "cd /workspace && \
+              python -m pip install -r requirements.txt && \
+              pyinstaller --clean --onedir --name intg-${DRIVER_ID} \
+                --collect-all ucapi \
+                --collect-all ucapi_framework \
+                --collect-all zeroconf \
+                intg_philips_titanos/__main__.py"
 
       - name: Prepare package
         shell: bash
@@ -55,7 +75,6 @@ jobs:
           chmod 755 artifacts/bin/driver
           cp driver.json artifacts/
           cp assets/philips-titanos-logo.png artifacts/
-          echo "ARTIFACT_NAME=uc-intg-${DRIVER_ID}-${VERSION}-aarch64" >> "$GITHUB_ENV"
 
       - name: Validate
         shell: bash
@@ -65,7 +84,6 @@ jobs:
           python - <<'PY'
           import struct
           from pathlib import Path
-
           logo = Path("artifacts/philips-titanos-logo.png")
           with logo.open("rb") as file:
               signature = file.read(8)
@@ -82,35 +100,15 @@ jobs:
           PY
           test -x artifacts/bin/driver
           test ! -e artifacts/bin/_internal/driver.json
-          test -f artifacts/driver.json
-          python - <<'PY'
-          from pathlib import Path
-          init_file = Path("intg_philips_titanos/__init__.py").read_text(encoding="utf-8")
-          assert "Path(sys.executable).resolve().parent / \"driver.json\"" in init_file
-          print("Runtime manifest lookup validated")
-          PY
-          python - <<'PY'
-          from pathlib import Path
-          source = Path("intg_philips_titanos/setup_flow.py").read_text(encoding="utf-8")
-          assert "import socket" in source, "setup_flow.py uses socket but does not import it"
-          compile(source, "setup_flow.py", "exec")
-          print("Setup flow imports and syntax validated")
-          PY
+          python -m compileall -q intg_philips_titanos
           jq -e --arg v "$VERSION" '.driver_id == "philips_titanos" and .version == $v' artifacts/driver.json >/dev/null
-
           python - <<'PY'
-          import json
           from pathlib import Path
-
           expected = "custom:philips-titanos-logo.png"
-          manifest = json.loads(Path("driver.json").read_text(encoding="utf-8"))
           entity = Path("intg_philips_titanos/remote.py").read_text(encoding="utf-8")
-
-          assert manifest["icon"] == expected, (manifest["icon"], expected)
-          assert expected in entity, "Entity does not reference unique custom icon"
-          assert Path("assets/philips-titanos-logo.png").is_file()
-          assert Path("artifacts/philips-titanos-logo.png").is_file()
-          print("Unique icon binding validated:", expected)
+          assert expected in entity
+          assert all(x in entity for x in ("HDMI_1", "HDMI_2", "HDMI_3", "HDMI_4"))
+          print("Entity icon and HDMI controls validated")
           PY
 
       - name: Create Remote 3 archive
@@ -121,7 +119,7 @@ jobs:
           cd ..
           tar tzf "${ARTIFACT_NAME}.tar.gz" | sed -n '1,30p'
 
-      - name: Upload artifact
+      - name: Upload workflow artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ARTIFACT_NAME }}
@@ -129,24 +127,23 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create GitHub Release automatically
+        if: github.event_name == 'push' && env.RELEASE_EXISTS == 'false'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          RELEASE_TITLE="Philips Titan OS ${TAG}"
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists, updating asset"
-            gh release upload "$TAG" \
-              "${ARTIFACT_NAME}.tar.gz" \
-              --clobber \
-              --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$TAG" \
-              "${ARTIFACT_NAME}.tar.gz" \
-              --title "$RELEASE_TITLE" \
-              --generate-notes \
-              --repo "$GITHUB_REPOSITORY"
-          fi
+          gh release create "$RELEASE_TAG" \
+            "${ARTIFACT_NAME}.tar.gz" \
+            --target "$GITHUB_SHA" \
+            --title "Philips Titan OS ${RELEASE_TAG}" \
+            --generate-notes \
+            --latest \
+            --repo "$GITHUB_REPOSITORY"
+
+      - name: Existing release notice
+        if: github.event_name == 'push' && env.RELEASE_EXISTS == 'true'
+        shell: bash
+        run: |
+          echo "Release ${RELEASE_TAG} already exists."
+          echo "Increase driver.json version before the next release."

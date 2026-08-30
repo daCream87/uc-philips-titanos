@@ -9,6 +9,13 @@ KEY_CANDIDATES = {
     "INFO": ["Info"],
     "TV_EXIT": ["WatchTV"],
     "SOURCE": ["Source"],
+    # v0.9.7 experimental direct HDMI key candidates. Titan OS firmware
+    # differs from Android/JointSpace models, so each command tries common
+    # vendor spellings in order without removing the proven SOURCE command.
+    "HDMI_1": ["Hdmi1", "HDMI1", "SourceHdmi1", "SourceHDMI1"],
+    "HDMI_2": ["Hdmi2", "HDMI2", "SourceHdmi2", "SourceHDMI2"],
+    "HDMI_3": ["Hdmi3", "HDMI3", "SourceHdmi3", "SourceHDMI3"],
+    "HDMI_4": ["Hdmi4", "HDMI4", "SourceHdmi4", "SourceHDMI4"],
     "CURSOR_UP": ["CursorUp"],
     "CURSOR_DOWN": ["CursorDown"],
     "CURSOR_LEFT": ["CursorLeft"],
