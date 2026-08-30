@@ -103,37 +103,46 @@ class PhilipsJointSpaceClient:
 
 
     async def diagnose_sources(self) -> dict[str, Any]:
-        """Probe read-only JointSpace endpoints that may expose inputs/source names.
+        """Log raw responses from likely Titan OS / JointSpace source endpoints.
 
-        Titan OS firmware differs between models.  This deliberately performs GET
-        requests only and logs the raw responses so we can determine which endpoint
-        the TV supports without changing the currently working control behaviour.
+        Diagnostic-only: GET requests, no source switching and no state changes.
+        Uses the already authenticated httpx client and logs HTTP status plus the
+        complete response body for every endpoint, including non-2xx responses.
         """
         endpoints = (
-            "activities/current",
-            "activities/tv",
-            "activities",
             "sources",
+            "activities",
+            "activities/current",
+            "currentactivity",
+            "channeldb/tv",
+            "menuitems/settings/current",
+            # Keep useful candidates from v0.9.4 as well.
+            "activities/tv",
             "input/sources",
             "applications",
         )
+        await self.start()
+        assert self._client is not None
         results: dict[str, Any] = {}
-        _LOG.info("=== Philips Titan OS source diagnostics START ===")
+        _LOG.info("SOURCE_DIAG START base=%s", self.base)
         for endpoint in endpoints:
+            url = f"{self.base}/{endpoint.lstrip('/')}"
+            _LOG.info("SOURCE_DIAG GET /%s/%s", self.api_version, endpoint)
             try:
-                value = await self.get(endpoint)
-                results[endpoint] = value
+                response = await self._client.get(url)
+                body = response.text
+                _LOG.info("SOURCE_DIAG HTTP %s endpoint=/%s/%s", response.status_code, self.api_version, endpoint)
+                _LOG.info("SOURCE_DIAG RESPONSE endpoint=/%s/%s body=%s", self.api_version, endpoint, body)
                 try:
-                    rendered = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+                    parsed = response.json() if response.content else None
                 except Exception:
-                    rendered = repr(value)
-                _LOG.info("SOURCE_DIAG endpoint=%s response=%s", endpoint, rendered)
+                    parsed = body
+                results[endpoint] = {"status": response.status_code, "response": parsed}
             except Exception as err:
-                _LOG.info(
-                    "SOURCE_DIAG endpoint=%s unavailable type=%s error=%s",
-                    endpoint, type(err).__name__, err,
-                )
-        _LOG.info("=== Philips Titan OS source diagnostics END ===")
+                results[endpoint] = {"error": f"{type(err).__name__}: {err}"}
+                _LOG.exception("SOURCE_DIAG ERROR endpoint=/%s/%s type=%s error=%s",
+                               self.api_version, endpoint, type(err).__name__, err)
+        _LOG.info("SOURCE_DIAG END")
         return results
 
     async def read_state(self) -> TvState:

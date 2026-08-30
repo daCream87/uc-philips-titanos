@@ -204,3 +204,10 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Results are written to the integration log as `SOURCE_DIAG` entries.
 - No source switching or existing control behaviour is changed in this diagnostic build.
 - The collected response determines whether a later build can expose the TV's original input names or must fall back to HDMI 1/2/3/4 labels.
+
+
+## v0.9.5 – Guaranteed input/source diagnostics
+
+- Runs `SOURCE_DIAG` once after the first successful TV API poll.
+- Logs HTTP status and the complete raw response for each tested source/activity endpoint.
+- Diagnostic requests are read-only and do not change TV control behaviour.
