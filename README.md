@@ -230,3 +230,12 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - The version in `driver.json` is used as the release tag (`vX.Y.Z`).
 - If that release already exists, the build is validated but no duplicate release is created.
 - The validated Remote 3 `.tar.gz` is attached directly to the GitHub Release.
+
+
+## v0.9.8 – Visible HDMI input page
+
+- Moves HDMI 1–4 from the extra eighth row of the control page to a dedicated **Eingänge** page.
+- Uses a simple 2×2 grid so all four HDMI test buttons are explicitly exposed in the Remote entity UI.
+- Keeps the proven Steuerung, Ziffern and Medien pages unchanged.
+- Keeps SOURCE and all existing physical/button mappings unchanged.
+- Keeps automatic build + GitHub Release creation on pushes to `main`.
