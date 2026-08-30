@@ -195,3 +195,12 @@ Confirmed working v0.8.4 baseline rebuilt for a fresh Git branch.
 - Keep the existing device connection alive during Remote 3 display standby.
 - Reduce background polling during standby to 15 seconds; restore 3 seconds on wake without reconnecting.
 - Update the Remote power state immediately after a successful TV standby command, while normal polling continues to verify the real state.
+
+
+## v0.9.4 – Input/source diagnostics
+
+- Adds a read-only diagnostic probe for Titan OS / JointSpace source metadata.
+- On connection it checks `activities/current`, `activities/tv`, `activities`, `sources`, `input/sources`, and `applications`.
+- Results are written to the integration log as `SOURCE_DIAG` entries.
+- No source switching or existing control behaviour is changed in this diagnostic build.
+- The collected response determines whether a later build can expose the TV's original input names or must fall back to HDMI 1/2/3/4 labels.

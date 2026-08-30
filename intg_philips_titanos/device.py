@@ -49,6 +49,12 @@ class PhilipsDevice(PollingDevice):
     async def establish_connection(self):
         await self._client.start()
         await self.poll_device()
+        # Diagnostic-only probe: read source/activity metadata once per connection.
+        # Failures are intentionally non-fatal and do not affect normal TV control.
+        try:
+            await self._client.diagnose_sources()
+        except Exception:
+            _LOG.debug("[%s] Source diagnostics failed unexpectedly", self.log_id, exc_info=True)
         return self._client
 
     async def disconnect(self):

@@ -101,6 +101,41 @@ class PhilipsJointSpaceClient:
                 sock.sendto(packet, ("255.255.255.255", 9))
         await asyncio.to_thread(_send)
 
+
+    async def diagnose_sources(self) -> dict[str, Any]:
+        """Probe read-only JointSpace endpoints that may expose inputs/source names.
+
+        Titan OS firmware differs between models.  This deliberately performs GET
+        requests only and logs the raw responses so we can determine which endpoint
+        the TV supports without changing the currently working control behaviour.
+        """
+        endpoints = (
+            "activities/current",
+            "activities/tv",
+            "activities",
+            "sources",
+            "input/sources",
+            "applications",
+        )
+        results: dict[str, Any] = {}
+        _LOG.info("=== Philips Titan OS source diagnostics START ===")
+        for endpoint in endpoints:
+            try:
+                value = await self.get(endpoint)
+                results[endpoint] = value
+                try:
+                    rendered = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+                except Exception:
+                    rendered = repr(value)
+                _LOG.info("SOURCE_DIAG endpoint=%s response=%s", endpoint, rendered)
+            except Exception as err:
+                _LOG.info(
+                    "SOURCE_DIAG endpoint=%s unavailable type=%s error=%s",
+                    endpoint, type(err).__name__, err,
+                )
+        _LOG.info("=== Philips Titan OS source diagnostics END ===")
+        return results
+
     async def read_state(self) -> TvState:
         state = TvState()
         try:
