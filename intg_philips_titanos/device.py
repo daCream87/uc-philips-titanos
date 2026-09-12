@@ -25,6 +25,9 @@ class PhilipsDevice(PollingDevice):
             secured_transport=device_config.secured_transport,
         )
         self._state = TvState()
+        # Serialize key commands so a second button press cannot interrupt an
+        # HDMI Source-menu macro halfway through.
+        self._command_lock = asyncio.Lock()
 
     @property
     def identifier(self):
@@ -98,7 +101,58 @@ class PhilipsDevice(PollingDevice):
             return await self.power_off()
         return await self.power_on()
 
+    async def _select_hdmi(self, command: str) -> bool:
+        """Select a fixed HDMI entry through the non-wrapping Source menu.
+
+        The Titan OS JointSpace API accepts direct HDMI-looking keys but does
+        not actually switch inputs. On this TV the Source menu order is fixed
+        and CursorUp stops at the first item, so ten Up presses provide a
+        deterministic anchor independent of the currently selected source.
+        """
+        down_steps = {
+            "HDMI_1": 7,
+            "HDMI_2": 6,
+            "HDMI_3": 8,
+            "HDMI_4": 9,
+        }
+        steps = down_steps.get(command)
+        if steps is None:
+            return False
+
+        async with self._command_lock:
+            try:
+                _LOG.info(
+                    "[%s] HDMI macro start: %s anchor_up=10 down=%s",
+                    self.log_id, command, steps,
+                )
+
+                await self._client.send_key("Source")
+                # Give Titan OS enough time to render and focus the Source menu.
+                await asyncio.sleep(0.9)
+
+                # Source list is non-wrapping: this always lands on the first item.
+                for _ in range(10):
+                    await self._client.send_key("CursorUp")
+                    await asyncio.sleep(0.12)
+
+                for _ in range(steps):
+                    await self._client.send_key("CursorDown")
+                    await asyncio.sleep(0.14)
+
+                # Let the final highlight settle before selecting it.
+                await asyncio.sleep(0.25)
+                await self._client.send_key("Confirm")
+                _LOG.info("[%s] HDMI macro complete: %s", self.log_id, command)
+                return True
+            except Exception as err:
+                _LOG.exception(
+                    "[%s] HDMI macro failed: %s: %s", self.log_id, command, err
+                )
+                return False
+
     async def send_command(self, command: str) -> bool:
+        if command in ("HDMI_1", "HDMI_2", "HDMI_3", "HDMI_4"):
+            return await self._select_hdmi(command)
         if command == "HDMI_DISCOVERY":
             try:
                 await self._client.source_discovery()
@@ -115,18 +169,19 @@ class PhilipsDevice(PollingDevice):
             if not keys:
                 return False
             last_error = None
-            for key in keys:
-                try:
-                    await self._client.send_key(key)
-                    _LOG.info("[%s] Command sent: %s -> %s", self.log_id, command, key)
-                    self._state.power = "STANDBY"
-                    self._state.online = False
-                    self.push_update()
-                    _LOG.info("[%s] Standby accepted; power state updated to OFF immediately", self.log_id)
-                    return True
-                except Exception as err:
-                    last_error = err
-                    _LOG.debug("[%s] Candidate key failed: %s -> %s: %s", self.log_id, command, key, err)
+            async with self._command_lock:
+                for key in keys:
+                    try:
+                        await self._client.send_key(key)
+                        _LOG.info("[%s] Command sent: %s -> %s", self.log_id, command, key)
+                        self._state.power = "STANDBY"
+                        self._state.online = False
+                        self.push_update()
+                        _LOG.info("[%s] Standby accepted; power state updated to OFF immediately", self.log_id)
+                        return True
+                    except Exception as err:
+                        last_error = err
+                        _LOG.debug("[%s] Candidate key failed: %s -> %s: %s", self.log_id, command, key, err)
             if isinstance(last_error, PhilipsConnectionError):
                 _LOG.error("[%s] Network error sending %s: %s", self.log_id, command, last_error)
             else:
@@ -139,20 +194,21 @@ class PhilipsDevice(PollingDevice):
             return False
 
         last_error = None
-        for key in keys:
-            try:
-                await self._client.send_key(key)
-                _LOG.info("[%s] Command sent: %s -> %s", self.log_id, command, key)
-                return True
-            except Exception as err:
-                last_error = err
-                _LOG.debug(
-                    "[%s] Candidate key failed: %s -> %s: %s",
-                    self.log_id,
-                    command,
-                    key,
-                    err,
-                )
+        async with self._command_lock:
+            for key in keys:
+                try:
+                    await self._client.send_key(key)
+                    _LOG.info("[%s] Command sent: %s -> %s", self.log_id, command, key)
+                    return True
+                except Exception as err:
+                    last_error = err
+                    _LOG.debug(
+                        "[%s] Candidate key failed: %s -> %s: %s",
+                        self.log_id,
+                        command,
+                        key,
+                        err,
+                    )
 
         if isinstance(last_error, PhilipsConnectionError):
             _LOG.exception("[%s] Network error sending %s", self.log_id, command)

@@ -263,3 +263,12 @@ The final row on the Steuerung page contains four independent HDMI 1 raw-key tes
 
 ## v0.9.12 HDMI discovery
 Temporary diagnostic build: the `HDMI DISCOVERY` button probes known JointSpace source endpoints, raw HDMI/F1-F4 keys and legacy `sources/current` payloads through the existing paired Remote 3 connection. Results are written to the integration log. HTTP 200 is logged but is not treated as proof of switching.
+
+## v0.9.13 deterministic HDMI selection
+
+HDMI 1-4 use the TV's fixed, non-wrapping Source menu. Each HDMI button opens
+Source, sends 10x CursorUp to anchor at the first entry, moves down to the
+known fixed entry and confirms it. Mapping: HDMI 1 = 7 down, HDMI 2 = 6 down,
+HDMI 3 = 8 down, HDMI 4 = 9 down. The normal SOURCE button remains available.
+Key commands are serialized while the macro runs to prevent overlapping button
+presses from corrupting the sequence.

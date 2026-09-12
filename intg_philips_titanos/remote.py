@@ -152,8 +152,11 @@ class PhilipsRemote(RemoteEntity):
                     self._text("🟡", 2, 6, "YELLOW"),
                     self._text("🔵", 3, 6, "BLUE"),
 
-                    # v0.9.12: one controlled discovery run using the existing pairing.
-                    self._text("HDMI DISCOVERY", 0, 7, "HDMI_DISCOVERY", 4),
+                    # v0.9.13: deterministic Source-menu HDMI macros.
+                    self._text("HDMI 1", 0, 7, "HDMI_1"),
+                    self._text("HDMI 2", 1, 7, "HDMI_2"),
+                    self._text("HDMI 3", 2, 7, "HDMI_3"),
+                    self._text("HDMI 4", 3, 7, "HDMI_4"),
 
                 ],
             },

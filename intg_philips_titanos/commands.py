@@ -9,15 +9,15 @@ KEY_CANDIDATES = {
     "INFO": ["Info"],
     "TV_EXIT": ["WatchTV"],
     "SOURCE": ["Source"],
-    # v0.9.7 experimental direct HDMI key candidates. Titan OS firmware
-    # differs from Android/JointSpace models, so each command tries common
-    # vendor spellings in order without removing the proven SOURCE command.
-    "HDMI_1": ["Hdmi1", "HDMI1", "SourceHdmi1", "SourceHDMI1"],
-    "HDMI_2": ["Hdmi2", "HDMI2", "SourceHdmi2", "SourceHDMI2"],
-    "HDMI_3": ["Hdmi3", "HDMI3", "SourceHdmi3", "SourceHDMI3"],
-    "HDMI_4": ["Hdmi4", "HDMI4", "SourceHdmi4", "SourceHDMI4"],
+    # v0.9.13 deterministic HDMI selection. These commands are intercepted
+    # by PhilipsDevice and executed as Source-menu navigation macros.
+    # The placeholders keep the commands available as Remote simple commands.
+    "HDMI_1": ["__SOURCE_MACRO__"],
+    "HDMI_2": ["__SOURCE_MACRO__"],
+    "HDMI_3": ["__SOURCE_MACRO__"],
+    "HDMI_4": ["__SOURCE_MACRO__"],
 
-    # v0.9.12 discovery command. Runs a controlled matrix of source tests
+    # v0.9.12 discovery command retained as a hidden diagnostic command.
     # through the already paired Remote 3 connection and logs every result.
     "HDMI_DISCOVERY": ["__DISCOVERY__"],
     "CURSOR_UP": ["CursorUp"],
